@@ -1,0 +1,14 @@
+{
+  "name": "vendor/cconverter",
+  "description": "description",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Andrei",
+      "email": "Andrei.sersukov@tptlive.ee"
+    }
+  ],
+  "require": {
+  }
+}

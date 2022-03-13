@@ -5,7 +5,7 @@ use DevTools\DotEnv;
 
 function CExchangeUnCached($date){
     
-    (new DotEnv(__DIR__ . '/.env'))->load();
+    (new DotEnv(__DIR__ . './.env'))->load();
     
     //YYYY-MM-DD 
     $request = "http://api.exchangeratesapi.io/v1/".$date."?access_key=".getenv("EXCHANGE_RATES_API_KEY")."&base=EUR";
@@ -29,8 +29,9 @@ function CConverter($amount=1.0, $from="EUR", $to="USD", $date=Null){
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <title>bruh</title>
 </head>
 <body>
 

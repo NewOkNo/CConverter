@@ -1,0 +1,17 @@
+.table{
+    margin: auto;
+    width: 80%;
+    background-color: aqua;
+    text-align: center;
+}
+
+.cart{
+    margin: 5%;
+    padding: 1%;
+    display: inline-block;
+    border: 1px solid black;
+    text-align: center;
+    border-radius: 8%;
+    min-height: 200px;
+    min-width: 400px;
+}
