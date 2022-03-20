@@ -1,0 +1,22 @@
+{
+  "name": "vendor/cconverter",
+  "description": "description",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Andrei",
+      "email": "Andrei.sersukov@tptlive.ee"
+    }
+  ],
+  "require": {
+    "slim/slim": "^4.10",
+    "slim/psr7": "^1.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/",
+      "Src\\": "src/"
+    }
+  }
+}
