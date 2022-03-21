@@ -29,7 +29,6 @@ abstract class Model{
      * Reads JSON file and returning JSON array.
      *
      * @return array
-     * @throws \Exception
      */
     protected function JSONDataGet(): array
     {
@@ -46,19 +45,28 @@ abstract class Model{
      * Reads JSON file and returning JSON array.
      *
      * @param array $json
-     * @param string $key
-     * @param string $value
-     * @return array
+     * @param string|array $key
+     * @return array|mixed|void
      */
-    protected function JSONDataFilter(array $json, string $key, string $value): array
+    protected function JSONDataFilter(array $json, string|array $key): array
     {
-        $newjson = [];
+        if(is_array($key)){
+            $path = "json";
+            foreach ($key as $_key) $path.'['.$_key.']';
+            try{
+                $value = ${$path};
+            }catch (\Exception){ return [400, "Such key-path does not exist!"]; }
+        } else{
+            if(!$value = $json[1][$key])return [400, "Such key does not exist!"];
+        }
+        return [200, $value];
+        /*$newjson = [];
         if(!$json[0][$key])return [400, "Key in not exists!"];
         foreach ($json as $object){
             if($object[$key] == $value) $newjson[] = $object;
         }
         if($newjson) return [200, $newjson];
-        else return [300, "Objects with such key value not found!"];
+        else return [300, "Objects with such key value not found!"];*/
     }
 
     //// Public Functions ////
@@ -76,16 +84,13 @@ abstract class Model{
     /**
      * Get model by key value.
      *
-     * @param string $key
-     * @param string|int $value
-     * @return array
-     * @throws \Exception
+     * @param string|array $key
+     * @return array|mixed|void
      */
-    public function get(string $key, string|int $value): array
+    public function get(string|array $key): array
     {
-        $json = $this->JSONDataFilter($this->JSONDataGet(), $key, strval($value));
+        $response = $this->JSONDataFilter($this->JSONDataGet(), $key);
 
-        if($json[0] != 200){ return $json; }
-        else return $json;
+        return $response;
     }
 }
