@@ -9,15 +9,14 @@ abstract class Model{
     /**
      * Saves new object to the JSON file.
      *
-     * @param string
+     * @param array $data
      * @return array
      * @throws \Exception
      */
-    protected function JSONDataPut($data): array
+    protected function JSONDataPut(array $data): array
     {
         try{
             $fp = fopen($this->jsonDir, 'w');
-            if($fp) // TODO: base for keys
             fwrite($fp, json_encode($data));
             fclose($fp);
         }catch (\Exception $e){
@@ -46,15 +45,20 @@ abstract class Model{
     /**
      * Reads JSON file and returning JSON array.
      *
-     * @param $json
+     * @param array $json
+     * @param string $key
+     * @param string $value
      * @return array
      */
-    protected function JSONDataSort($json, $key, $value): array
+    protected function JSONDataFilter(array $json, string $key, string $value): array
     {
+        $newjson = [];
+        if(!$json[0][$key])return [400, "Key in not exists!"];
         foreach ($json as $object){
-            if()
+            if($object[$key] == $value) $newjson[] = $object;
         }
-        return [300, ""];
+        if($newjson) return [200, $newjson];
+        else return [300, "Objects with such key value not found!"];
     }
 
     //// Public Functions ////
@@ -72,15 +76,16 @@ abstract class Model{
     /**
      * Get model by key value.
      *
-     * @param $key
-     * @param $searchable
+     * @param string $key
+     * @param string|int $value
      * @return array
      * @throws \Exception
      */
-    public function get($key, $searchable): array
+    public function get(string $key, string|int $value): array
     {
-        $json = $this->JSONDataGet();
+        $json = $this->JSONDataFilter($this->JSONDataGet(), $key, strval($value));
+
         if($json[0] != 200){ return $json; }
-        return [];
+        else return $json;
     }
 }

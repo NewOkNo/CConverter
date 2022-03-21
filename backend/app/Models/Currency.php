@@ -27,16 +27,20 @@ class Currency extends Model
      * @return array
      * @throws \Exception
      */
-    public function getExchangeRateTable($base='EUR'){
+    public function getExchangeRatesTable($base='EUR'): array
+    {
         $json = $this->JSONDataGet();
         if($json[0] != 200){ return $json; }
         if($base != 'EUR'){
-            $json = $this->get('code', $base);
+            $json = $this->JSONDataFilter($json[1],'code', $base);
             if($json[0] != 200){ return $json; }
             else{
-                foreach ($json[1] as $cur){
-                    $json = $this->convertExchangeRateBase($cur['code']);
-                    if($json[0] != 200){ return $json; }
+                foreach ($json[1] as $object){
+                    try{
+                        $newBase = floatval($json[1][0]['rate']);
+                        $rate = floatval($object['rate']);
+                    }catch (\Exception $e){ return [500, "Rate is not a float type!"]; }
+                    $json[1]['rate'] = $this->convertExchangeRatesBase($newBase, $rate);
                 }
             }
         }
@@ -46,19 +50,13 @@ class Currency extends Model
     /**
      * Reads JSON file and returning JSON array.
      *
-     * @param string
-     * @return array
-     * @throws \Exception
+     * @param float $newBase
+     * @param float $value
+     * @return float
      */
-    public function convertExchangeRateBase($base='EUR'){
-        $json = $this->JSONDataGet();
-        if($json[0] != 200){ return $json; }
-        if($base != 'EUR'){
-            if($json[1][$base]!=null){
-                $json = $this->convertExchangeRateBase($base);
-                if($json[0] != 200){ return $json; }
-            } else return [400, "Wrong base code"];
-        }
-        return [200, $json];
+    protected function convertExchangeRatesBase(float $newBase, float $rate): float
+    {
+        $newRate = $newBase * $rate;
+        return $newRate;
     }
 }
