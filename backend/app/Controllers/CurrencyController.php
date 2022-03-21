@@ -18,7 +18,7 @@ class CurrencyController extends Controller{
      */
     public function get(Request $request, Response $response, array $args): Response
     {
-        $curency = Currency::class();
+        //$curency = Currency::class();
         $response->getBody()->write("bruh! t".$args['to']." f".$args['from']);
         return $response;
     }
