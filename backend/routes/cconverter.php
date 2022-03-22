@@ -11,6 +11,7 @@ $app = AppFactory::create();
 
 // Add error middleware
 $app->addErrorMiddleware(true, true, true);
+//$app->addErrorMiddleware(false, false, false);
 
 // Add routes
 $app->get('/', function (Request $request, Response $response) {

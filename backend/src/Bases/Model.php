@@ -4,6 +4,22 @@ namespace Src\Bases;
 
 abstract class Model{
 
+    //// Base settings ////
+
+    /**
+     * Models JSON location.
+     *
+     * @var string
+     */
+    protected $jsonDir = __DIR__ . '/../../public/storage/'.__CLASS__.'.json';
+
+    /**
+     * Models body path.
+     *
+     * @var array
+     */
+    protected $body = ['dody'];
+
     //// Protected Functions ////
 
     /**
@@ -15,8 +31,9 @@ abstract class Model{
      */
     protected function JSONDataPut(array $data): array
     {
+        // TODO: test
         try{
-            $fp = fopen($this->jsonDir, 'w');
+            $fp = fopen($this->jsonLocation, 'w');
             fwrite($fp, json_encode($data));
             fclose($fp);
         }catch (\Exception $e){
@@ -32,12 +49,10 @@ abstract class Model{
      */
     protected function JSONDataGet(): array
     {
-        try{
-            $rawjson = file_get_contents($this->jsonDir);
-            $json = json_decode($rawjson);
-        }catch (\Exception $e){
-            return [500, "Failed to read data from the json file"];
-        }
+        $rawjson = file_get_contents($this->jsonLocation);
+        if(!$rawjson) return [404, "File is not found!"];
+        $json = json_decode($rawjson);
+        if(!$json) return [500, "Impossible to decode JSON!"];
         return [200, $json];
     }
 
@@ -48,7 +63,7 @@ abstract class Model{
      * @param string|array $key
      * @return array|mixed|void
      */
-    protected function JSONDataFilter(array $json, string|array $key): array
+    /*protected function JSONDataFilter(array $json, string|array $key): array
     {
         if(is_array($key)){
             $path = "json";
@@ -67,7 +82,7 @@ abstract class Model{
         }
         if($newjson) return [200, $newjson];
         else return [300, "Objects with such key value not found!"];*/
-    }
+    //}
 
     //// Public Functions ////
 
@@ -87,10 +102,12 @@ abstract class Model{
      * @param string|array $key
      * @return array|mixed|void
      */
-    public function get(string|array $key): array
+    /*public function get(string|array $key): array
     {
-        $response = $this->JSONDataFilter($this->JSONDataGet(), $key);
+        $response = $this->JSONDataGet();
+        if($response->status )
+        $response = $this->JSONDataFilter(, $key);
 
         return $response;
-    }
+    }*/
 }

@@ -7,11 +7,11 @@ use Src\Bases\Model;
 class Currency extends Model
 {
     /**
-     * JSON file where to save data.
+     * Models JSON location.
      *
      * @var string
      */
-    protected $jsonDir = __DIR__ . '/../../public/storage/exchangeRates.json';
+    protected $jsonLocation = __DIR__ . '/../../public/storage/exchangeRates/';
 
     /**
      * round() limit.
@@ -20,14 +20,50 @@ class Currency extends Model
      */
     protected $roundLimit = 6;
 
-
-    // TODO: think about this shit
     /**
-     * Model path.
+     * Models body path.
      *
      * @var array
      */
-    protected $modelPath = ['rates'];
+    //protected $body = ['rates'];
+
+    /**
+     * Models base structure.
+     *
+     * @var array
+     */
+    /*protected $baseStructure = [
+        '$date' => [
+            'base' => '$base',
+            'rates' => '$rates'
+        ]
+    ];*/
+
+    // TODO: fuck it (~5:00?)
+    /**
+     * Baltics panks last Exchange Rate update.
+     *
+     * @var int
+     */
+    //protected $ = ['rates'];
+
+    /**
+     * Date format.
+     *
+     * @var string
+     */
+    protected $dateFormat = 'Y-m-d';
+
+    /**
+     * Models constructor.
+     *
+     * @param string|null $date
+     */
+    function __construct(?string $date)
+    {
+        $response = $this->getWorkingDate();
+        //$this->jsonLocation .= $this->getDate($date).'.json';
+    }
 
     /**
      * Gets Exchange Rates Table with wanted $base.
@@ -36,10 +72,12 @@ class Currency extends Model
      * @return array
      * @throws \Exception
      */
-    public function getExchangeRatesTable($base='EUR'): array
+    public function getExchangeRatesTable(string $base='EUR'): array
     {
         $json = $this->JSONDataGet();
-        if($json[0] != 200){ return $json; }
+        if($json[0] != 200){
+            if($json[0] == 404) $this->create();
+        }
         if($base != 'EUR'){
             //$json = $this->JSONDataFilter($json[1],'code', $base);
             if(!$json[1]->rates->$base){ return $json; }
@@ -70,6 +108,23 @@ class Currency extends Model
     {
         $newRate = $baseRate * $rate;
         return round($newRate, $this->roundLimit);
+    }
+
+    /**
+     * Returning checked received $date or today's date.
+     *
+     * @param string|null $date
+     * @return array
+     */
+    protected function getWorkingDate(?string $date = null): array
+    {
+        $dateNow = \DateTime::createFromFormat($this->dateFormat, 'now');
+        if($date){
+            $date = \DateTime::createFromFormat($this->dateFormat, $date);
+            if(!$date) return [400, "Incorrect date format! Must be ".$this->dateFormat];
+            else if($date > $dateNow) return [400, "You can't use future dates!"];
+            else return [200, $date->format($this->dateFormat)];
+        } else return [200, $dateNow->format($this->dateFormat)];
     }
 
 }
