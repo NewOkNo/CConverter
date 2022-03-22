@@ -11,14 +11,28 @@ abstract class Model{
      *
      * @var string
      */
-    protected $jsonDir = __DIR__ . '/../../public/storage/'.__CLASS__.'.json';
+    //protected $jsonLocation = __DIR__ . '/../../public/storage/'.__CLASS__.'.json';
+
+    /**
+     * Path to the model's JSON cache location.
+     *
+     * @var string
+     */
+    protected $jsonLocation = __DIR__ . '/../../public/storage';
+
+    /**
+     * JSON cache file name.
+     *
+     * @var string
+     */
+    protected $jsonName = __CLASS__;
 
     /**
      * Models body path.
      *
      * @var array
      */
-    protected $body = ['dody'];
+    //protected $body = ['dody'];
 
     //// Protected Functions ////
 
@@ -32,13 +46,11 @@ abstract class Model{
     protected function JSONDataPut(array $data): array
     {
         // TODO: test
-        try{
-            $fp = fopen($this->jsonLocation, 'w');
-            fwrite($fp, json_encode($data));
-            fclose($fp);
-        }catch (\Exception $e){
-            return [500, "Failed to add data to the json file"];
-        }
+        if(!file_exists($this->jsonLocation)) mkdir($this->jsonLocation);
+        $file = fopen($this->jsonLocation.'/'.$this->jsonName.'.json', 'w');
+        if(!$file) return [500, "Can't create a file!"];
+        if(!fwrite($file, json_encode($data))) return [500, "Can't write in a file!"];
+        fclose($file);
         return [200, true];
     }
 
@@ -49,7 +61,7 @@ abstract class Model{
      */
     protected function JSONDataGet(): array
     {
-        $rawjson = file_get_contents($this->jsonLocation);
+        $rawjson = file_get_contents($this->jsonLocation.'/'.$this->jsonName.'.json');
         if(!$rawjson) return [404, "File is not found!"];
         $json = json_decode($rawjson);
         if(!$json) return [500, "Impossible to decode JSON!"];

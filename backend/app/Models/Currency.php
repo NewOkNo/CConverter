@@ -7,11 +7,18 @@ use Src\Bases\Model;
 class Currency extends Model
 {
     /**
-     * Models JSON location.
+     * Model's JSON location.
      *
      * @var string
      */
-    protected $jsonLocation = __DIR__ . '/../../public/storage/exchangeRates/';
+    //protected $jsonLocation = __DIR__ . '/../../public/storage/exchangeRates/';
+
+    /**
+     * Path to the model's JSON cache location.
+     *
+     * @var string
+     */
+    protected $jsonLocation = __DIR__ . '/../../public/storage/exchangeRates';
 
     /**
      * round() limit.
@@ -39,7 +46,7 @@ class Currency extends Model
         ]
     ];*/
 
-    // TODO: fuck it (~5:00?)
+    // TODO: fuck it (~18:00? for the Leedu Pank && ~00:00? for the Eesti Pank)
     /**
      * Baltics panks last Exchange Rate update.
      *
@@ -55,14 +62,46 @@ class Currency extends Model
     protected $dateFormat = 'Y-m-d';
 
     /**
+     * Date of the working model.
+     *
+     * @var string
+     */
+    protected $date;
+
+    /**
+     * Errors array.
+     *
+     * @var array
+     */
+    protected $errors = [];
+
+    /**
+     * Request Sources.
+     *
+     * @var array
+     */
+    protected $requestSources = [
+        "Eesti Pank" => [
+
+        ],
+    ];
+
+    /**
      * Models constructor.
      *
      * @param string|null $date
      */
-    function __construct(?string $date)
+    function __construct(?string $date = null)
     {
-        $response = $this->getWorkingDate();
-        //$this->jsonLocation .= $this->getDate($date).'.json';
+        $response = $this->getDate($date);
+        if($response[0] != 200) {
+            $this->errors[] = $response;
+            $response = $this->getDate(null);
+        }
+        $this->date = $response[1];
+        $ymd = preg_split('-', $this->date);
+        $this->jsonLocation .= '/'.$ymd[0].'/'.$ymd[1];
+        $this->jsonName = $ymd[2];
     }
 
     /**
@@ -74,27 +113,30 @@ class Currency extends Model
      */
     public function getExchangeRatesTable(string $base='EUR'): array
     {
-        $json = $this->JSONDataGet();
-        if($json[0] != 200){
-            if($json[0] == 404) $this->create();
+        $response = $this->JSONDataGet();
+        if($response[0] != 200){
+            if($response[0] == 404){
+                $response = $this->requestData();
+                if($response[0] != 200) return $response;
+            } else return $response;
         }
         if($base != 'EUR'){
             //$json = $this->JSONDataFilter($json[1],'code', $base);
-            if(!$json[1]->rates->$base){ return $json; }
+            if(!$response[1]->rates->$base){ return $response; }
             else{
                 //$json[1]->base = $base;
-                $baseRate = $json[1]->rates->$base;
-                unset($json[1]->rates->$base);
-                foreach ($json[1]->rates as $code => $rate){
+                $baseRate = $response[1]->rates->$base;
+                unset($response[1]->rates->$base);
+                foreach ($response[1]->rates as $code => $rate){
                     /*try{
                         $rate = floatval($rate);
                     }catch (\Exception $e){ return [500, "Rate is not a float type!"]; }*/
-                    $json[1]->rates->$code = $this->convertExchangeRatesBase(floatval($baseRate), floatval($rate));
+                    $response[1]->rates->$code = $this->convertExchangeRatesBase(floatval($baseRate), floatval($rate));
                 }
-                $json[1]->rates->EUR = round(1.0 / $baseRate, $this->roundLimit);
+                $response[1]->rates->EUR = round(1.0 / $baseRate, $this->roundLimit);
             }
         }
-        return [200, $json[1]];
+        return [200, $response[1]];
     }
 
     /**
@@ -116,7 +158,7 @@ class Currency extends Model
      * @param string|null $date
      * @return array
      */
-    protected function getWorkingDate(?string $date = null): array
+    protected function getDate(?string $date): array
     {
         $dateNow = \DateTime::createFromFormat($this->dateFormat, 'now');
         if($date){
@@ -125,6 +167,16 @@ class Currency extends Model
             else if($date > $dateNow) return [400, "You can't use future dates!"];
             else return [200, $date->format($this->dateFormat)];
         } else return [200, $dateNow->format($this->dateFormat)];
+    }
+
+    /**
+     * Requesting data from different $requestSources.
+     *
+     * @return array
+     */
+    protected function requestData(): array
+    {
+        return [200];
     }
 
 }
