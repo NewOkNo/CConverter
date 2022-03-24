@@ -19,7 +19,8 @@ class CurrencyController extends Controller{
     public function get(Request $request, Response $response, array $args): Response
     {
         $currency = new Currency();
-        $resp = $currency->getExchangeRatesTable("CAD");
+        //$resp = $currency->getExchangeRatesTable("CAD");
+        $resp = $currency->getDataWithPattern();
         //$response->withStatus(400);
         //$response->getBody()->write("bruh! t".$args['to']." f".$args['from']."\n ");
         $response->getBody()->write(json_encode($resp[1]));

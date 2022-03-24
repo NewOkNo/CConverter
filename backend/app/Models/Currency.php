@@ -75,14 +75,31 @@ class Currency extends Model
      */
     protected $errors = [];
 
+    //'pattern' => 'gesmes\:\Envelope:[Cube:[Cube:i[imported:$_date]]{1}+Cube:i[currency:$_code+rate:$_rate]{?}]{1}'
     /**
      * Request Sources.
      *
      * @var array
      */
     protected $requestSources = [
-        "Eesti Pank" => [
-
+        'Eesti Pank' => [
+            'xml' => [
+                'link' => 'https://haldus.eestipank.ee/et/export/currency_rates?_date=$_date&type=xml',
+                'pattern' => [
+                    'base' => 'Cube:Cube',
+                    'date' => '_base["imported"]',
+                    'rates' => '$_base[1+]',
+                    'code' => '$_rates:currency',
+                    'rate' => '$_rates:rate'
+                ],
+                'saveTo' => './storage/temp/EPER'
+            ],
+            'json' => [
+                'link' => 'https://www.eestipank.ee/api/get',
+                'method' => 'POST',
+                'body' => 'url: "en/rest/currency_rates"',
+                'pattern' => 'imported:$_date|rates:$_rates'
+            ]
         ],
     ];
 
@@ -99,7 +116,7 @@ class Currency extends Model
             $response = $this->getDate(null);
         }
         $this->date = $response[1];
-        $ymd = preg_split('-', $this->date);
+        $ymd = preg_split('/-/', $this->date);
         $this->jsonLocation .= '/'.$ymd[0].'/'.$ymd[1];
         $this->jsonName = $ymd[2];
     }
@@ -160,7 +177,7 @@ class Currency extends Model
      */
     protected function getDate(?string $date): array
     {
-        $dateNow = \DateTime::createFromFormat($this->dateFormat, 'now');
+        $dateNow = \DateTime::createFromFormat($this->dateFormat, date('Y-m-d'));
         if($date){
             $date = \DateTime::createFromFormat($this->dateFormat, $date);
             if(!$date) return [400, "Incorrect date format! Must be ".$this->dateFormat];
@@ -177,6 +194,49 @@ class Currency extends Model
     protected function requestData(): array
     {
         return [200];
+    }
+
+    /**
+     * Requesting data from different $requestSources.
+     *
+     * @return array
+     */
+    public function getDataWithPattern(): array
+    {
+        $data = $this->requestSources['Eesti Pank']['xml'];
+        $data['saveTo'] .= $this->date . ".xml";
+
+        $link = str_replace('$_date', $this->date, $data['link']);
+
+        /*$html = file_get_contents($link);
+        $doc = new DOMDocument();
+        $doc->loadHTML($html);
+        $_base = simplexml_import_dom($doc);*/
+
+        if (file_put_contents($data['saveTo'], file_get_contents($link))){
+
+            $_base = simplexml_load_file($data['saveTo']) or die("Error: Cannot create object");
+
+            $pattern = $data['pattern'];
+            /*$_base = $pattern['base'];
+            $_date = $pattern['date'];
+            $_rates = $pattern['rates'];
+            $_code = $pattern['code'];
+            $_rate = $pattern['rate'];*/
+
+            if($pattern['base']){
+                $path = preg_split('/:/', $pattern['base']);
+                foreach($path as $p){
+                    $_base = $_base->$p;
+                }
+            }
+
+            //$path = preg_split(':', $pattern['date']);
+            //$date = ${$pattern['date']};
+
+            return [200, $_base['imported']];
+        }
+        return [200, 'not nice'];
     }
 
 }
