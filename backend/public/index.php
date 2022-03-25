@@ -9,6 +9,9 @@
 /*error_reporting(0);
 ini_set('display_errors', 0);*/
 
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
 require __DIR__ . '/../routes/cconverter.php';
 
 ?>

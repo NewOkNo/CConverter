@@ -20,7 +20,7 @@ class CurrencyController extends Controller{
     {
         $currency = new Currency();
         //$resp = $currency->getExchangeRatesTable("CAD");
-        $resp = $currency->getDataWithPattern();
+        $resp = $currency->getExchangeRatesTable();
         //$response->withStatus(400);
         //$response->getBody()->write("bruh! t".$args['to']." f".$args['from']."\n ");
         $response->getBody()->write(json_encode($resp[1]));
