@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<items type="widgets">
+            <item>
+                            <pavadinimas><![CDATA[Currency name]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[Currency code]]></valiutos_kodas>
+                            <santykis><![CDATA[Proportion]]></santykis>
+                            <data><![CDATA[Date]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Australian dollar]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[AUD]]></valiutos_kodas>
+                            <santykis><![CDATA[1,4624]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Bulgarian lev]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[BGN]]></valiutos_kodas>
+                            <santykis><![CDATA[1,9558]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Brazilian real]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[BRL]]></valiutos_kodas>
+                            <santykis><![CDATA[5,2634]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Canadian dollar]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[CAD]]></valiutos_kodas>
+                            <santykis><![CDATA[1,3781]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Swiss franc]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[CHF]]></valiutos_kodas>
+                            <santykis><![CDATA[1,0207]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Chinese yuan renminbi]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[CNY]]></valiutos_kodas>
+                            <santykis><![CDATA[7,0007]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Czech koruna]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[CZK]]></valiutos_kodas>
+                            <santykis><![CDATA[24,645]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Danish krone]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[DKK]]></valiutos_kodas>
+                            <santykis><![CDATA[7,4404]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Pound sterling]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[GBP]]></valiutos_kodas>
+                            <santykis><![CDATA[0,8338]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Hong Kong dollar]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[HKD]]></valiutos_kodas>
+                            <santykis><![CDATA[8,6117]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Croatian kuna]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[HRK]]></valiutos_kodas>
+                            <santykis><![CDATA[7,5754]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Hungarian forint]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[HUF]]></valiutos_kodas>
+                            <santykis><![CDATA[373,81]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Indonesian rupiah]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[IDR]]></valiutos_kodas>
+                            <santykis><![CDATA[15777,69]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Israeli new shekel]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[ILS]]></valiutos_kodas>
+                            <santykis><![CDATA[3,5351]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Indian rupee]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[INR]]></valiutos_kodas>
+                            <santykis><![CDATA[83,8235]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Iceland krona]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[ISK]]></valiutos_kodas>
+                            <santykis><![CDATA[142,2]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Japanese yen]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[JPY]]></valiutos_kodas>
+                            <santykis><![CDATA[134,07]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[South Korean won]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[KRW]]></valiutos_kodas>
+                            <santykis><![CDATA[1343,32]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Mexican peso]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[MXN]]></valiutos_kodas>
+                            <santykis><![CDATA[21,9908]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Malaysian ringgit]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[MYR]]></valiutos_kodas>
+                            <santykis><![CDATA[4,6324]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Norwegian krone]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[NOK]]></valiutos_kodas>
+                            <santykis><![CDATA[9,5205]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[New Zealand dollar]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[NZD]]></valiutos_kodas>
+                            <santykis><![CDATA[1,5787]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Philippine peso]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[PHP]]></valiutos_kodas>
+                            <santykis><![CDATA[57,322]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Polish zloty]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[PLN]]></valiutos_kodas>
+                            <santykis><![CDATA[4,7307]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Romanian leu]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[RON]]></valiutos_kodas>
+                            <santykis><![CDATA[4,9487]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Swedish krona]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[SEK]]></valiutos_kodas>
+                            <santykis><![CDATA[10,3505]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Singapore dollar]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[SGD]]></valiutos_kodas>
+                            <santykis><![CDATA[1,4919]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Thai baht]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[THB]]></valiutos_kodas>
+                            <santykis><![CDATA[36,906]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[Turkish lira]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[TRY]]></valiutos_kodas>
+                            <santykis><![CDATA[16,3304]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[US dollar]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[USD]]></valiutos_kodas>
+                            <santykis><![CDATA[1,1002]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+            <item>
+                            <pavadinimas><![CDATA[South African rand]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[ZAR]]></valiutos_kodas>
+                            <santykis><![CDATA[16,0386]]></santykis>
+                            <data><![CDATA[25-03-2022]]></data>
+            
+        </item>
+    
+</items>

@@ -4,7 +4,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
-require __DIR__ . '/../vendor/autoload.php';
+//require __DIR__ . '/../vendor/autoload.php';
 
 // Instantiate App
 $app = AppFactory::create();
@@ -26,6 +26,7 @@ $app->get('/hello/{name}', function (Request $request, Response $response, $args
 });
 
 //$app->get('/cconverter[?to={to}][&from={from}]]', [\App\Controllers\CurrencyController::class, 'get']);
-$app->get('/cconverter[/{to:[A-Za-z]{3}}[/{from:[A-Za-z]{3}}]]', [\App\Controllers\CurrencyController::class, 'get']);
+//$app->get('/cconverter[/{date:[A-Za-z]{3}}[/{from:[A-Za-z]{3}}]]', [\App\Controllers\CurrencyController::class, 'get']);
+$app->get('/cconverter[/{date}[/{base}]]', [\App\Controllers\CurrencyController::class, 'get']);
 
 $app->run();

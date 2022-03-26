@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Src\Bases\Model;
 
-class Currency extends Model
+class ExchangeRates extends Model
 {
     /**
      * Model's JSON location.
@@ -80,6 +80,7 @@ class Currency extends Model
 
     //'pattern' => 'gesmes\:\Envelope:[Cube:[Cube:i[imported:$_date]]{1}+Cube:i[currency:$_code+rate:$_rate]{?}]{1}'
     //'pattern' => 'imported:$_date|rates:$_rates'
+    // TODO: fix stupid pattern
     /**
      * Request Sources.
      *
@@ -198,12 +199,12 @@ class Currency extends Model
     /**
      * Gets Exchange Rates Table with wanted $base.
      *
-     * @param string
+     * @param string|null $base
      * @return array
-     * @throws \Exception
      */
-    public function getExchangeRatesTable(string $base='EUR'): array
+    public function getExchangeRatesTable(?string $base='EUR'): array
     {
+        if(!$base) $base = 'EUR';
         $response = $this->JSONDataGet();
         if($response[0] != 200){
             if($response[0] == 404){
@@ -216,6 +217,7 @@ class Currency extends Model
             if(!$response[1]->rates->$base){ return $response; }
             else{
                 //$json[1]->base = $base;
+                $response[1]->base = $base;
                 $baseRate = $response[1]->rates->$base;
                 unset($response[1]->rates->$base);
                 foreach ($response[1]->rates as $code => $rate){
@@ -279,9 +281,10 @@ class Currency extends Model
     /**
      * Requesting data from different $requestSources.
      *
+     * @param array $data
      * @return array
      */
-    public function getData(array $data): array
+    protected function getData(array $data): array
     {
         //$data = $this->requestSources['Eesti Pank']['xml'];
         //$data = $this->requestSources['Eesti Pank']['json'];
@@ -431,11 +434,12 @@ class Currency extends Model
         /*$base = $this->objectStructure['base'];
         $_base = str_replace('_base', $object['_code'], $base);
         $_base = str_replace('_rates', $_rates, $_base);*/
+        $base['date'] = $this->date;
         $base['base'] = (string)$object['_base'];
-        $base['rates'] = $rates;
+        $base['rates'] = (object)$rates;
 
-        $obj[$this->date] = $base;
+        //$obj[$this->date] = $base;
 
-        return [200, $obj];
+        return [200, (object)$base];
     }
 }
