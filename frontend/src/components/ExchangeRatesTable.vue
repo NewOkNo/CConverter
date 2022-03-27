@@ -1,57 +1,48 @@
-<script lang="ts">
+<script setup lang="ts">
+
+//import { ref } from 'vue'
 import { defineComponent } from "vue";
 import { getExchangeRates } from "@/components/scripts/exchangeRates";
 
-export default defineComponent({
+/*export default defineComponent({
   props: {
-    base: String
+    base: String,
   },
-  data(){
+  data() {
     return {
-      base: this.base,
-      date: 1,
-      response: null
-    }
+      date: null,
+      data: {date: null, rates: {}, base: null},
+    };
   },
   created() {
-    //new getExchangeRates(this.date, this.base).getRates().then(res => (this.response = res[1]))
-    fetch("http://localhost:8000/cconverter/2022-03-25/EUR").then(res => res.json()).then(data => (this.response = data));
-  }
+    new getExchangeRates(this.date, this.base)
+      .getRates()
+      .then((res) => (this.data = res));
+  },
+});*/
+
+interface Props{
+  data?: Object
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  data: {date: null, base: null, rates: {}},
 })
-/*const props = defineProps<{
-  base: string;
-}>();
-//const emit = defineEmits(["change", "delete"]);
-//let date = new Date().toISOString().slice(0, 10);
-//import { defineComponent } from "vue";
-import { getExchangeRates } from "@/components/scripts/exchangeRates";
-//const response = await (new getExchangeRates(null, props.base)).getRates();
-const response = "proverka";
-//const response2 = await fetch("http://localhost:8000/cconverter/2022-03-25/EUR").then(res => res.json()).then(data => (response = data.code));*/
+
+//const {data = {date: null, base: null, rates: {}}} = defineProps<Props>()
+
+/*const props = defineProps({
+  data: Object,
+});*/
+
+/*let date = ref(null);
+let data = ref({date: null, rates: {}, base: null});
+
+new getExchangeRates(date, props.base)
+      .getRates()
+      .then((res) => (data = res));*/
+
 </script>
-
-<!---import { defineComponent } from "vue";
-
-export default defineComponent({
-  props: {
-    base: String
-  },
-  data(){
-    return {
-      response: "fdx"
-    }
-  },
-  created(){
-    fetch("http://localhost:8000/cconverter/2022-03-25/EUR")
-      .then(res => res.json())
-      .then(data => (this.response = data.code))
-  }
-  methods: {
-    vruh(){
-      this.response = await fetch("http://localhost:8000/cconverter/2022-03-25/EUR").then(res => res.json()).then(data => (response = data.code))
-    }
-  },
-})-->
 
 <template>
   <div class="main">
@@ -62,11 +53,11 @@ export default defineComponent({
       <div class="settings">
         <!--<div class="date" id="date"></div>
         <div class="base" id="base"></div>-->
-        <div class="date">{{ response.date }}</div>
-        <div class="base">{{ response.base }}</div>
+        <div class="date">{{ data.date }}</div>
+        <div class="base">{{ data.base }}</div>
       </div>
     </div>
-    <!--<div>
+    <div class="table">
       <table>
         <thead>
           <tr>
@@ -75,13 +66,13 @@ export default defineComponent({
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(rate, currency) in response[1].rates">
+          <tr v-for="(rate, currency) in data.rates">
             <td>{{ currency }}</td>
             <td>{{ rate }}</td>
           </tr>
         </tbody>
       </table>
-    </div>-->
+    </div>
   </div>
 </template>
 
@@ -98,7 +89,6 @@ export default defineComponent({
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 0 20px;
 }
 .main .header div {
   display: flex;
@@ -106,9 +96,11 @@ export default defineComponent({
   align-items: center;
   /*justify-content: space-between;
   width: 100%;*/
-  padding: 0 20px;
 }
 .main .header .settings div {
   padding: 0 10px;
+}
+
+.main .table {
 }
 </style>

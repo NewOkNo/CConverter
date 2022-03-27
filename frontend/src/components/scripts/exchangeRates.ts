@@ -6,7 +6,8 @@ class getExchangeRates {
     if (date) this.date = date;
     else {
       const date = new Date();
-      date.setDate(date.getDate() - 1);
+      // TODO: change date to today's one in 13:00 (fix backend first)
+      date.setDate(date.getDate() - 2);
       this.date = date.toISOString().slice(0, 10);
     }
 
@@ -27,11 +28,14 @@ class getExchangeRates {
   }*/
   //// fetch() does ajax requests so it's probably counts ////
   async getRates() {
-    //return [200, "bruh"]
-    let response;
-    fetch(this.url + this.date + "/" + this.base).then(res => res.json()).then(rs => (response = rs));
-    return response;
-    /*await fetch(this.url + this.date + "/" + this.base).then((res) => {
+    //return this;
+    //this.url + this.date + "/" + this.base
+    //let response;
+    return fetch(this.url + this.date + "/" + this.base).then(
+      (res) => res.json()
+    );
+    //return [200, response];
+    /*fetch(this.url + this.date + "/" + this.base).then((res) => {
       if (res.ok) return [200, res.json()];
       else return [res.status, res.json()];
     }).catch((err) => {
