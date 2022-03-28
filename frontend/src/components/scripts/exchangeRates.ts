@@ -19,7 +19,8 @@ class getExchangeRates {
     if(to) this.to = to;
     else this.to = '';
 
-    this.url += this.date+'/'+this.base+'/'+this.to;
+    this.url += this.date+'/'+this.base
+    //if(this.to) this.url += '/'+this.to;
   }
   /*getRates() {
     const xhttp = new XMLHttpRequest();
@@ -38,23 +39,28 @@ class getExchangeRates {
     //return this;
     //this.url + this.date + "/" + this.base
     //let response;
-    
+
     /*return fetch(this.url, {cache: "force-cache"}).then(
       (res) => res.json()
     );*/
     let response = fetch(this.url, {cache: "force-cache"})
-      .then((res) => { 
+      .then((res) => {
         if(res.ok) return res.json()
         else throw new Error('Network response was not OK');
       })
       .then((json) => {
-        if(json.data != this.date || json.base != this.base) throw new Error('Wrong data');
+        if(json.date != this.date || json.base != this.base) throw new Error('Wrong data'+json.date+' '+json.base+' '+this.date+' '+this.base);
         else{
           if(this.to){
-            if(json.rates[this.to]) return json.rates[this.to]
+            if(json.rates[this.to]) return json.rates[this.to];
           }
+          else return json.rates;
         }
       })
+      .catch((err) => {
+        console.log(err);
+      });
+    return response;
     //return [200, response];
     /*fetch(this.url + this.date + "/" + this.base).then((res) => {
       if (res.ok) return [200, res.json()];
@@ -65,3 +71,4 @@ class getExchangeRates {
   }
 }
 export { getExchangeRates };
+//export default getExchangeRates;

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<items type="widgets">
+            <item>
+                            <pavadinimas><![CDATA[Currency name]]></pavadinimas>
+                            <valiutos_kodas><![CDATA[Currency code]]></valiutos_kodas>
+                            <santykis><![CDATA[Proportion]]></santykis>
+                            <data><![CDATA[Date]]></data>
+            
+        </item>
+    
+</items>

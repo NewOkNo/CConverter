@@ -4,18 +4,33 @@
 import { getExchangeRates } from "@/components/scripts/exchangeRates";
 import { ref, onMounted, computed } from 'vue';
 
+
 interface Props{
-  data?: Object
+  date?: String,
+  base?: String,
+  to?: String,
+  amountFrom?: Number,
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  data: {date: null, base: null, rates: {}},
+  date: null,
+  base: 'EUR',
+  to: 'USD',
+  amountFrom: 1,
 })
 
-const cCodeFrom = ref('EUR')
-const cCodeTo = ref('USD')
-const cValueFrom = ref(1)
-const cValueTo = ref(props.data.rates[cCodeTo])
+const date = ref(props.date)
+const base = ref(props.base)
+const to = ref(props.to)
+const amountFrom = ref(props.amountFrom)
+
+const amountTo = ref(0)
+
+const rates = ref({})
+
+new getExchangeRates(date.value, base.value).getRates().then((res) => {
+  rates.value = res
+})
 
 function getRounded(value: number | string) {
   if(!value) return 0
@@ -34,44 +49,36 @@ function getRounded(value: number | string) {
       }
     }
   }
-  //if(afterDot < 2) return number
-  console.log(value)
   if(afterDot > 2 && beforeDot > 3) return value.toFixed(2)
   else if(afterDot > 4) return value.toFixed(4)
   else return value
 }
 
-//cValueFrom.value = computed(() => cValueFrom.value.toFixed(fixNum))
-
-//cValueTo.value = cValueFrom.value * props.data.rates[cCodeTo.value]
-
-/*onMounted (() => {
-  if(props.data.date){
-    cValueTo.value = cValueFrom.value * props.data.rates[cCodeTo.value]
-  }
-  //cValueTo.value = cValueFrom.value * props.data.rates[cCodeTo.value]
-})*/
-
 function converCurency(event: Event) {
-  let type = event.target.type
-  let id = event.target.id
+  //let type = event.target.type
+  let id = event.target.id.split(':')
   let value = event.target.value
 
-  if(type == 'text'){
+  let mult = (base.value == props.base) ? 1 : 1 / rates.value[base.value]
+
+  if(id[1] == 'input'){
     if(!value || value == '' || value == null) value = '0'
     value = value.replace(/[^0-9.]+/g, '')
     while(value.length > 1 && value.charAt(0)=='0' && value.charAt(1)!='.') value = value.substr(1)
     //value = getRounded(value)
-    if(id == 'from') {
-      cValueFrom.value = value
-      cValueTo.value = getRounded(value * props.data.rates[cCodeTo.value])
+    if(id[0] == 'from') {
+      amountFrom.value = value
+      amountTo.value = getRounded(mult * value * rates.value[to.value])
     } else {
-      cValueTo.value = value
-      cValueFrom.value = getRounded(value / props.data.rates[cCodeTo.value])
+      amountTo.value = value
+      amountFrom.value = getRounded(mult * value / rates.value[to.value])
     }
   }
+  else if(id[1] == 'select'){
+    amountTo.value = getRounded(mult * amountFrom.value * rates.value[to.value])
+  }
 }
-//cValueFrom*data.rates.(cCodeTo.value)
+
 </script>
 
 <template>
@@ -80,23 +87,23 @@ function converCurency(event: Event) {
       <div class="header">Currency Converter</div>
       <div class="body">
         <div class="from">
-          <select class="cur" id="from" type="select" v-model="cCodeFrom">
-            <option>{{ cCodeFrom }}</option>
-            <option v-for="(rate, currency) in data.rates">{{ currency }}</option>>
+          <select class="cur" id="from:select" v-model="base" @change="converCurency">
+            <option :value="props.base">{{ props.base }}</option>
+            <option v-for="(rate, currency) in rates" :value="currency" @click="converCurency">{{ currency }}</option>
           </select>
-          <input class="amount" id="from" type="text" v-model="cValueFrom" @input="converCurency" maxlength="8">
+          <input class="amount" id="from:input" type="text" v-model="amountFrom" @input="converCurency" maxlength="8">
         </div>
         <div class="symb">-></div>
         <div class="to">
-          <input class="amount" id="to" type="text" v-model="cValueTo" @input="converCurency" maxlength="8">
-          <select class="cur" id="from" type="select" v-model="cCodeTo">
-            <option v-for="(rate, currency) in data.rates">{{ currency }}</option>>
+          <input class="amount" id="to:input" type="text" v-model="amountTo" @input="converCurency" maxlength="8">
+          <select class="cur" id="to:select" v-model="to" @change="converCurency">
+            <option v-for="(rate, currency) in rates" :value="currency">{{ currency }}</option>
           </select>
         </div>
       </div>
       <div class="footer">
         <div class="text">Convertations date:</div>
-        <div class="date">{{ data.date }}</div>
+        <div class="date">{{ date }}</div>
       </div>
     </form>
   </div>
