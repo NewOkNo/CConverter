@@ -80,13 +80,18 @@ function converCurency(event: Event) {
       <div class="header">Currency Converter</div>
       <div class="body">
         <div class="from">
-          <div class="cur">{{ data.base }}</div>
+          <select class="cur" id="from" type="select" v-model="cCodeFrom">
+            <option>{{ cCodeFrom }}</option>
+            <option v-for="(rate, currency) in data.rates">{{ currency }}</option>>
+          </select>
           <input class="amount" id="from" type="text" v-model="cValueFrom" @input="converCurency" maxlength="8">
         </div>
         <div class="symb">-></div>
         <div class="to">
           <input class="amount" id="to" type="text" v-model="cValueTo" @input="converCurency" maxlength="8">
-          <div class="cur">USD</div>
+          <select class="cur" id="from" type="select" v-model="cCodeTo">
+            <option v-for="(rate, currency) in data.rates">{{ currency }}</option>>
+          </select>
         </div>
       </div>
       <div class="footer">
@@ -105,7 +110,7 @@ function converCurency(event: Event) {
   border-right: 1px solid #ccc;
   width: 100%;
 }
-.converter div {
+.converter div, select {
   display: flex;
   flex-direction: column;
 }
@@ -123,7 +128,7 @@ function converCurency(event: Event) {
   display: flex;
   flex-direction: row;
 }
-.converter .body div, input {
+.converter .body div, input, select {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -152,6 +157,9 @@ function converCurency(event: Event) {
   padding: 8px;
   display: flex;
   justify-content: center;
+}
+.converter .body .cur option {
+  text-align: center;
 }
 .converter .body .from .cur {
   border-radius: 0 12px 12px 0;
@@ -191,11 +199,11 @@ function converCurency(event: Event) {
 .converter .footer .text {
   margin-bottom: 2px;
 }
-input{
+input, select{
   background: none;
   border: none;
 }
-input:focus {
+input:focus, select:focus{
   background: white;
   border: 1px solid grey;
 }

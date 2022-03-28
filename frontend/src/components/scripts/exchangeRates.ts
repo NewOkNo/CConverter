@@ -2,12 +2,13 @@ class getExchangeRates {
   date: string;
   base: string;
   url = "http://localhost:8000/cconverter/";
+  cachedRates: Object = {};
   constructor(date?: string, base?: string) {
     if (date) this.date = date;
     else {
       const date = new Date();
       // TODO: change date to today's one in 13:00 (fix backend first)
-      date.setDate(date.getDate() - 2);
+      date.setDate(date.getDate() - 3);
       this.date = date.toISOString().slice(0, 10);
     }
 
@@ -31,7 +32,8 @@ class getExchangeRates {
     //return this;
     //this.url + this.date + "/" + this.base
     //let response;
-    return fetch(this.url + this.date + "/" + this.base).then(
+    
+    return fetch(this.url + this.date + "/" + this.base, {cache: "force-cache"}).then(
       (res) => res.json()
     );
     //return [200, response];
