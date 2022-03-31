@@ -94,7 +94,7 @@ class ExchangeRates extends Model
                 'method' => 'POST',
                 'body' => ['url' => 'en/rest/currency_rates'],
                 'pattern' => [
-                    'base' => [
+                    /*'base' => [
                         '_base' => '',
                         '_date' => '_base->imported',
                         '_rates' => '_base->rates'
@@ -102,10 +102,14 @@ class ExchangeRates extends Model
                     'rates' => [
                         '_code' => 'code',
                         '_rate' => 'rate'
-                    ]
+                    ]*/
+                    '_date' => 'imported',
+                    '_rates' => 'rates:[]',
+                    '_code' => '_rates->4->code',
+                    /*'_rate' => '_rates->4->rate',*/
                 ]
             ],
-            'xml' => [
+            /*'xml' => [
                 'type' => 'xml',
                 'link' => 'https://haldus.eestipank.ee/et/export/currency_rates?date=$_date&type=xml',
                 'pattern' => [
@@ -120,9 +124,9 @@ class ExchangeRates extends Model
                     ]
                 ],
                 'saveTo' => './storage/temp/EPER-'
-            ]
+            ]*/
         ],
-        'Leedu Pank' => [
+        /*'Leedu Pank' => [
             'xml' => [
                 'type' => 'xml',
                 'link' => 'https://www.lb.lt/en/currency/daylyexport/?xml=1&class=Eu&type=day&date_day=$_date',
@@ -148,7 +152,7 @@ class ExchangeRates extends Model
                     '_date' => ':3'
                 ]
             ]
-        ],
+        ],*/
         /*'exchangeratesapi' => [
             'json' => [
                 'type' => 'json',
@@ -185,6 +189,7 @@ class ExchangeRates extends Model
      */
     function __construct(?string $date = null)
     {
+        $this->clearTemp();
         $response = $this->getDate($date);
         if($response[0] != 200) {
             $this->errors[] = $response;
@@ -210,6 +215,11 @@ class ExchangeRates extends Model
             if($response[0] == 404){
                 $response = $this->requestData();
                 if($response[0] != 200) return $response;
+                $response = $this->JSONDataPut($response[1]);
+                if($response[0] != 200) {
+                    // TODO: ignore all errors like that one and log them
+                    error_log("data creation error");
+                }
             } else return $response;
         }
         if($base != 'EUR'){
@@ -275,7 +285,8 @@ class ExchangeRates extends Model
                 if($response[0] == 200) return [200, $response[1]];
             }
         }
-        return [500, "All requests were failed"];
+        return $response;
+        //return [500, "All requests were failed"];
     }
 
     /**
@@ -357,7 +368,7 @@ class ExchangeRates extends Model
         }else { return [404, 'Unknown type']; }
 
 
-        $base = $data['pattern']['base'];
+        /*$base = $data['pattern']['base'];
         $response = $this->getDataViaPattern($start, $base);
         if($response[0]!=200) return $response;
         if($response[1]['_date'] != $this->date) return [500, "Incorrect date returned"];
@@ -375,7 +386,11 @@ class ExchangeRates extends Model
             $_rates[] = $response[1];
         }
         $obj['_rates'] = $_rates;
-        //return [200, $response[1]];
+        //return [200, $response[1]];*/
+        // TODO: EstPank json date pick
+        $response = $this->getDataViaPattern2($start, $data['pattern']);
+        return [100, $response];
+
         $response = $this->createObject($obj);
         if($response[0]!=200) return $response;
 
@@ -409,6 +424,83 @@ class ExchangeRates extends Model
                 if($pathkey && !in_array($pathkey, array_keys($pattern))){ ${$patkey} = ${$patkey}->$pathkey; }
                 if($pathitem){ ${$patkey} = ${$patkey}[$pathitem]; }
                 //if(ctype_digit($pathitem)) {$pathitem}
+            }
+            $pattern[$patkey] = ${$patkey};
+        }
+        return [200, $pattern];
+    }
+
+    /**
+     * Custom method to get data via pattern.
+     *
+     * @param object $startingPoint
+     * @param array $pattern
+     * @return array
+     */
+    protected function getDataViaPattern2(object $startingPoint, array $pattern): array
+    {
+        foreach ($pattern as $patkey => $patvalue){
+            $path = [];
+            $items = preg_split('/->/', $patvalue);
+            foreach($items as $item){
+                $item = preg_split('/:/', $item);
+                while(array_key_exists($item[0], $path)){ $item[0] = $item[0].'|'; }
+                if(count($item)>1){
+                    $path[$item[0]] = $item[1];
+                } else{ $path[$item[0]] = null; }
+            }
+            if($patkey == key($pattern) || !array_key_exists(key($path), $pattern)){ ${$patkey} = $startingPoint;}
+            else if(!is_string($pattern[key($path)])) { ${$patkey} = ${key($path)}; }
+            else return [400, "Wrong pattern elements positioning"];
+            foreach ($path as $pathkey => $pathitem){
+                /*$apndToArray = false;
+                $i = 0;
+                $d = 1;*/
+                $itemsKeysArray = [null];
+                if(${$patkey}->{'/modifier/'}){
+                    if(${$patkey}->{'/modifier/'} == '[]'){
+                        $arr = (array)${$patkey};
+                        unset($arr['/modifier/']);
+                        $itemsKeysArray = array_keys($arr);
+                        //${$patkey}->{'/items/'} = [];
+                        //$apndToArray = true;
+                    }
+                }
+                foreach($itemsKeysArray as $itemKey){
+                    if($pathkey){while (str_ends_with($pathkey, '|')) { $pathkey = substr($pathkey, 0, -1); }}
+                    if($pathkey && !in_array($pathkey, array_keys($pattern))){
+                        if($itemKey){
+                            if(!${$patkey}->{'/items/'}){
+                                //return [100, (array)(((array)${$patkey})[$itemKey])];
+                                ${$patkey}->{'/items/'}[$itemKey] = (array)(((array)${$patkey})[$itemKey])[$pathkey];
+                            }
+                            else{
+                                ${$patkey}->{'/items/'}[$itemKey] = ${$patkey}->{'/items/'}[$itemKey][$pathkey];
+                            }
+                            /*if($pathkey == 'code'){
+                                return [100, ${$patkey}->{'/items/'}[$itemKey]];
+                            }*/
+                            //return [100, ${$patkey}->{'/items/'}];
+                            /*if($pathkey == 'code'){
+                                return [100, (array)(((array)${$patkey})[$itemKey])];
+                            }*/
+                            //${$patkey}->{'/items/'}[$itemKey] = ${$patkey}->{'/items/'}[$itemKey][$pathkey];
+                            /*if($pathkey == 'code'){
+                                return [100, ${$patkey}->{'/items/'}[$itemKey]];
+                            }*/
+                            //return [100, ${$patkey}->{'/items/'}[$itemKey]];
+                        }
+                        else ${$patkey} = ${$patkey}->$pathkey;
+                    }
+                    if($pathitem){
+                        if($pathitem=='[]') ${$patkey}->{'/modifier/'} = "[]";
+                        else{
+                            if($itemKey) ${$patkey}->{'/items/'}[$itemKey] = ${$patkey}->{'/items/'}[$itemKey][$pathitem];
+                            else ${$patkey} = ${$patkey}[$pathitem];
+                        }
+                    }
+                    //$i++;
+                }
             }
             $pattern[$patkey] = ${$patkey};
         }

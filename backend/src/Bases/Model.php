@@ -28,6 +28,13 @@ abstract class Model{
     protected $jsonName = __CLASS__;
 
     /**
+     * TEMP path.
+     *
+     * @var string
+     */
+    protected $tempPath = __DIR__ . '/../../public/storage/temp';
+
+    /**
      * Models body path.
      *
      * @var array
@@ -39,14 +46,13 @@ abstract class Model{
     /**
      * Saves new object to the JSON file.
      *
-     * @param array $data
+     * @param array|object|string $data
      * @return array
-     * @throws \Exception
      */
-    protected function JSONDataPut(array $data): array
+    protected function JSONDataPut(array|object|string $data): array
     {
         // TODO: test
-        if(!file_exists($this->jsonLocation)) mkdir($this->jsonLocation);
+        if(!file_exists($this->jsonLocation)) mkdir($this->jsonLocation, 0777, true);
         $file = fopen($this->jsonLocation.'/'.$this->jsonName.'.json', 'w');
         if(!$file) return [500, "Can't create a file!"];
         if(!fwrite($file, json_encode($data))) return [500, "Can't write in a file!"];
@@ -66,6 +72,20 @@ abstract class Model{
         $json = json_decode($rawjson);
         if(!$json) return [500, "Impossible to decode JSON!"];
         return [200, $json];
+    }
+
+    /**
+     * Flushes TEMP directory.
+     *
+     * @return void
+     */
+    protected function clearTemp()
+    {
+        $files = glob($this->tempPath.'/*');
+        foreach ($files as $file){
+            unlink($file);
+        }
+        rmdir($this->tempPath);
     }
 
     /**
