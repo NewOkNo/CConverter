@@ -14,7 +14,8 @@
     "slim/psr7": "^1.5",
     "ext-json": "*",
     "ext-simplexml": "*",
-    "vlucas/phpdotenv": "^5.4"
+    "vlucas/phpdotenv": "^5.4",
+    "ext-libxml": "*"
   },
   "autoload": {
     "psr-4": {

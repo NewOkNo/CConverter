@@ -6,12 +6,6 @@ use Src\Bases\Model;
 
 class ExchangeRates extends Model
 {
-    /**
-     * Model's JSON location.
-     *
-     * @var string
-     */
-    //protected $jsonLocation = __DIR__ . '/../../public/storage/exchangeRates/';
 
     /**
      * Path to the model's JSON cache location.
@@ -27,12 +21,6 @@ class ExchangeRates extends Model
      */
     protected $roundLimit = 6;
 
-    /**
-     * Models body path.
-     *
-     * @var array
-     */
-    //protected $body = ['rates'];
 
     /**
      * Model's object structure.
@@ -78,9 +66,6 @@ class ExchangeRates extends Model
      */
     protected $errors = [];
 
-    //'pattern' => 'gesmes\:\Envelope:[Cube:[Cube:i[imported:$_date]]{1}+Cube:i[currency:$_code+rate:$_rate]{?}]{1}'
-    //'pattern' => 'imported:$_date|rates:$_rates'
-    // TODO: fix stupid pattern
     /**
      * Request Sources.
      *
@@ -92,95 +77,69 @@ class ExchangeRates extends Model
                 'type' => 'json',
                 'link' => 'https://www.eestipank.ee/api/get',
                 'method' => 'POST',
-                'body' => ['url' => 'en/rest/currency_rates'],
+                'body' => ['url' => 'en/rest/currency_rates?imported=$_date'],
                 'pattern' => [
-                    /*'base' => [
-                        '_base' => '',
-                        '_date' => '_base->imported',
-                        '_rates' => '_base->rates'
-                    ],
-                    'rates' => [
-                        '_code' => 'code',
-                        '_rate' => 'rate'
-                    ]*/
+
                     '_date' => 'imported',
-                    '_rates' => 'rates:[]',
-                    '_code' => '_rates->4->code',
-                    /*'_rate' => '_rates->4->rate',*/
+                    '_rates' => 'rates->[]',
+                    '_code' => '_rates->0->code',
+                    '_rate' => '_rates->0->rate',
                 ]
             ],
-            /*'xml' => [
+            'xml' => [
                 'type' => 'xml',
-                'link' => 'https://haldus.eestipank.ee/et/export/currency_rates?date=$_date&type=xml',
+                'link' => 'https://haldus.eestipank.ee/et/export/currency_rates?imported=$_date&type=xml',
                 'pattern' => [
-                    'base' => [
-                        '_base' => 'Cube->Cube',
-                        '_date' => '_base:imported',
-                        '_rates' => '_base->Cube'
-                    ],
-                    'rates' => [
-                        '_code' => ':currency',
-                        '_rate' => ':rate'
-                    ]
+
+                    '_stpoint' => 'Cube->Cube',
+                    '_date' => '_stpoint->@attributes->imported',
+                    '_rates' => '_stpoint->Cube->[]',
+                    '_code' => '_rates->@attributes->currency',
+                    '_rate' => '_rates->@attributes->rate',
                 ],
                 'saveTo' => './storage/temp/EPER-'
-            ]*/
+            ]
         ],
-        /*'Leedu Pank' => [
+        'Leedu Pank' => [
             'xml' => [
                 'type' => 'xml',
                 'link' => 'https://www.lb.lt/en/currency/daylyexport/?xml=1&class=Eu&type=day&date_day=$_date',
+                'saveTo' => './storage/temp/LPER-',
+                'dateFormat' => 'd-m-Y',
                 'pattern' => [
-                    'base' => [
-                        '_base' => '',
-                        '_date' => '_base->data:1',
-                        '_rates' => ''
-                    ],
-                    'rates' => [
-                        '_code' => 'valiutos_kodas',
-                        '_rate' => 'santykis'
-                    ]
+                    '_date' => 'item->1->data',
+                    '_rates' => 'item->[]',
+                    '_code' => '_rates->valiutos_kodas',
+                    '_rate' => '_rates->santykis'
                 ],
-                'saveTo' => './storage/temp/LPER-'
             ],
             'html' => [
-                'type' => 'LPhtml',
+                'type' => 'html',
                 'link' => 'https://www.lb.lt/fxrates_csv.lb?tp=EU&rs=1&dte=$_date',
                 'pattern' => [
-                    '_code' => ':1',
-                    '_rate' => ':2',
-                    '_date' => ':3'
+                    '_date' => '0->3',
+                    '_rates' => '[]',
+                    '_code' => '_rates->1',
+                    '_rate' => '_rates->2'
                 ]
             ]
-        ],*/
-        /*'exchangeratesapi' => [
+        ],
+        'exchangeratesapi' => [
             'json' => [
                 'type' => 'json',
-                'link' => 'https://api.exchangeratesapi.io/v1/$_date?access_key=$_key',
-                'key' => (string)$_ENV['EXCHANGE_RATES_API_KEY'],
+                'link' => 'http://api.exchangeratesapi.io/v1/$_date?access_key=$_key',
+                'key' => 'EXCHANGE_RATES_API_KEY',
                 'method' => 'GET',
                 'body' => [],
                 'pattern' => [
-                    'base' => [
-                        '_base' => '',
-                        '_date' => '_base->date',
-                        '_rates' => '_base->rates'
-                    ],
-                    'rates' => [
-                        '_code' => 'code',
-                        '_rate' => 'rate'
-                    ]
+                    '_date' => 'date',
+                    '_rates' => 'rates->[]',
+                    '_code' => '_rates->@selfkey',
+                    '_rate' => '_rates->@selfvalue'
                 ]
             ]
-        ]*/
+        ]
     ];
-
-    /**
-     * Acceptable http status codes.
-     *
-     * @var string
-     */
-    protected $acStatusCodes = [100, 299];
 
     /**
      * Models constructor.
@@ -215,8 +174,8 @@ class ExchangeRates extends Model
             if($response[0] == 404){
                 $response = $this->requestData();
                 if($response[0] != 200) return $response;
-                $response = $this->JSONDataPut($response[1]);
-                if($response[0] != 200) {
+                $response2 = $this->JSONDataPut($response[1]);
+                if($response2[0] != 200) {
                     // TODO: ignore all errors like that one and log them
                     error_log("data creation error");
                 }
@@ -231,9 +190,6 @@ class ExchangeRates extends Model
                 $baseRate = $response[1]->rates->$base;
                 unset($response[1]->rates->$base);
                 foreach ($response[1]->rates as $code => $rate){
-                    /*try{
-                        $rate = floatval($rate);
-                    }catch (\Exception $e){ return [500, "Rate is not a float type!"]; }*/
                     $response[1]->rates->$code = $this->convertExchangeRatesBase(floatval($baseRate), floatval($rate));
                 }
                 $response[1]->rates->EUR = round(1.0 / $baseRate, $this->roundLimit);
@@ -259,14 +215,15 @@ class ExchangeRates extends Model
      * Returning checked received $date or today's date.
      *
      * @param string|null $date
+     * @param string $format
      * @return array
      */
-    protected function getDate(?string $date): array
+    protected function getDate(?string $date, string $format = 'Y-m-d'): array
     {
-        $dateNow = \DateTime::createFromFormat($this->dateFormat, date('Y-m-d'));
+        $dateNow = \DateTime::createFromFormat($format, date($format));
         if($date){
-            $date = \DateTime::createFromFormat($this->dateFormat, $date);
-            if(!$date) return [400, "Incorrect date format! Must be ".$this->dateFormat];
+            $date = \DateTime::createFromFormat($format, $date);
+            if(!$date) return [400, "Error while creating a date!"];
             else if($date > $dateNow) return [400, "You can't use future dates!"];
             else return [200, $date->format($this->dateFormat)];
         } else return [200, $dateNow->format($this->dateFormat)];
@@ -285,8 +242,8 @@ class ExchangeRates extends Model
                 if($response[0] == 200) return [200, $response[1]];
             }
         }
-        return $response;
-        //return [500, "All requests were failed"];
+        //return $response;
+        return [500, "All requests were failed"];
     }
 
     /**
@@ -297,101 +254,102 @@ class ExchangeRates extends Model
      */
     protected function getData(array $data): array
     {
-        //$data = $this->requestSources['Eesti Pank']['xml'];
-        //$data = $this->requestSources['Eesti Pank']['json'];
         $type = $data['type'];
         $link = str_replace('$_date', $this->date, $data['link']);
 
         if($type == 'xml'){
             $data['saveTo'] .= $this->date . ".xml";
 
-            /*$html = file_get_contents($link);
-            $doc = new DOMDocument();
-            $doc->loadHTML($html);
-            $_base = simplexml_import_dom($doc);*/
+            $response = $this->makeRequest($link);
+            if($response[0]!=200) return $response;
 
-            $response = file_get_contents($link);
-            preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#", $http_response_header[0], $out);
-            $respCode = $out[1];
-            if($respCode <= $this->acStatusCodes[0] || $respCode >= $this->acStatusCodes[1]) return [500, 'Request fail'];
-
-            if (file_put_contents($data['saveTo'], $response)){
-                $start = simplexml_load_file($data['saveTo']) or die("Error: Cannot create object");
+            if (file_put_contents($data['saveTo'], $response[1])){
+                $start = simplexml_load_file($data['saveTo'], null, LIBXML_NOCDATA) or die("Error: Cannot create object");
             }
-            else return [500, 'File saving fail'];
+            else return [500, 'Fail while saving a file'];
         }
         else if($type == 'json'){
-            $postdata = http_build_query(
-                array(
-                    key($data['body']) => reset($data['body'])
-                )
-            );
-            $opts = array('http' =>
-                array(
-                    'method' => $data['method'],
-                    'header' => 'Content-type: application/x-www-form-urlencoded',
-                    'content' => $postdata
-                )
-            );
-            $context = stream_context_create($opts);
-            $response = file_get_contents($link, context: $context);
-            preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#", $http_response_header[0], $out);
-            $respCode = $out[1];
-            if($respCode <= $this->acStatusCodes[0] || $respCode >= $this->acStatusCodes[1]) return [500, 'Request fail'];
-            $start = json_decode($response);
-            //return [200, $start->imported];
-        }
-        else if($type == 'LPhtml'){
-            $response = file_get_contents($link);
-            preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#", $http_response_header[0], $out);
-            $respCode = $out[1];
-            if($respCode <= $this->acStatusCodes[0] || $respCode >= $this->acStatusCodes[1]) return [500, 'Request fail'];
-
-            $lines = preg_split("/\r\n|\r|\n/", $response);
-            $obj = [];
-            $obj['_base'] = 'EUR';
-            $_date = preg_split('/,/',$lines[0])[3];
-            if($_date != $this->date) return [500, "Incorrect date returned"];
-            $obj['_date'] = $_date;
-            $_rates = [];
-            foreach($lines as $line){
-                $_code = preg_split('/,/',$line)[1];
-                $_rate = preg_split('/,/',$line)[2];
-                $_rates[] = ['_code' => $_code, '_rate' => $_rate];
+            // TODO: automate it more
+            if(stristr($data['link'], '$_key')) $data['link'] = str_replace('$_key', $_ENV[$data['key']], $data['link']);
+            if(stristr($data['link'], '$_date')) $link = str_replace('$_date', $this->date, $data['link']);
+            //return [100, $link];
+            if($data['method']=='POST'){
+                $data['body'] = str_replace('$_date', $this->date, $data['body']);
+                $postdata = http_build_query([key($data['body']) => reset($data['body'])]);
+                $opts = ['http' => [
+                        'method' => $data['method'],
+                        'header' => 'Content-type: application/x-www-form-urlencoded',
+                        'content' => $postdata
+                    ]
+                ];
+                $context = stream_context_create($opts);
+                $response = $this->makeRequest($link, $context);
             }
-            $obj['_rates'] = $_rates;
+            else{
+                $response = $this->makeRequest($link);
+            }
 
-            $response = $this->createObject($obj);
             if($response[0]!=200) return $response;
 
-            return [200, $response[1]];
+            $start = json_decode($response[1]);
+        }
+        else if($type == 'html'){
+            $response = $this->makeRequest($link);
+            if($response[0]!=200) return $response;
+
+            $start = [];
+            $lines = preg_split("/\r\n|\r|\n/", $response[1]);
+            foreach ($lines as $idx => $line) $start[$idx] = preg_split('/,/',$line);
         }else { return [404, 'Unknown type']; }
 
-
-        /*$base = $data['pattern']['base'];
-        $response = $this->getDataViaPattern($start, $base);
+        $response = $this->getDataViaPattern($start, $data['pattern']);
         if($response[0]!=200) return $response;
+        unset($response[1]['_date']['/modifier/']);
+        unset($response[1]['_rates']['/modifier/']);
+        unset($response[1]['_rate']['/modifier/']);
+        unset($response[1]['_code']['/modifier/']);
+        if(!$response[1]['_date'] || empty($response[1]['_date']) ||
+            !$response[1]['_rates'] || empty($response[1]['_rates']) ||
+            !$response[1]['_rate'] || empty($response[1]['_rate']) ||
+            !$response[1]['_code'] || empty($response[1]['_code'])) return [500, "Data wasn't returned!"];
+
+        if(is_array($response[1]['_date'])) $response[1]['_date'] = $response[1]['_date'][0];
+        $dateFormat = $data['dateFormat'];
+        if($dateFormat && $dateFormat!=$this->dateFormat){
+            $response2 = $this->getDate($response[1]['_date'], $dateFormat);
+            if($response2[0] != 200) return $response2;
+            $response[1]['_date'] = $response2[1];
+        }
         if($response[1]['_date'] != $this->date) return [500, "Incorrect date returned"];
         $response[1]['_base'] = 'EUR';
-        $obj = $response[1];
 
-        $rates = $data['pattern']['rates'];
-        $_rates = [];
-        foreach ($response[1]['_rates'] as $rate){
-            if($type=='json') { $rate = end($rate); }
-            $response = $this->getDataViaPattern($rate, $rates);
-            if($response[0]!=200) return $response;
-            $response[1]['_rate'] = str_replace(',', '.', (string)$response[1]['_rate']);
-            if(!floatval((string)$response[1]['_rate'])) continue;
-            $_rates[] = $response[1];
+        $rates = [];
+        foreach ($response[1]['_code'] as $codeKey => $codeValue){
+            if(is_array($codeValue)) $codeValue = $codeValue[0];
+            if(!preg_match("/^[A-Z]{3}$/", $codeValue)) continue;
+            $rates[$codeKey] = [];
+            $rates[$codeKey]['_code'] = $codeValue;
         }
-        $obj['_rates'] = $_rates;
-        //return [200, $response[1]];*/
-        // TODO: EstPank json date pick
-        $response = $this->getDataViaPattern2($start, $data['pattern']);
-        return [100, $response];
+        foreach ($response[1]['_rate'] as $rateKey => $rateValue){
+            if(is_array($rateValue)) $rateValue = $rateValue[0];
+            $rateValue = str_replace(',', '.', $rateValue);
+            if(!is_numeric($rateValue)) continue;
+            if(!$rates[$rateKey]) continue;
+            $rates[$rateKey]['_rate'] = $rateValue;
+        }
 
-        $response = $this->createObject($obj);
+        /*$_rates = [];
+
+        foreach ($rates as $rate){
+            if(!$rate) continue;
+            $rates[$rate['_code']] = $rate['_rate'];
+        }*/
+
+        $response[1]['_rates'] = $rates;
+        unset($response[1]['_code']);
+        unset($response[1]['_rate']);
+
+        $response = $this->createObject($response[1]);
         if($response[0]!=200) return $response;
 
         return [200, $response[1]];
@@ -400,14 +358,14 @@ class ExchangeRates extends Model
     /**
      * Custom method to get data via pattern.
      *
-     * @param object $startingPoint
+     * @param object|array $startingPoint
      * @param array $pattern
      * @return array
      */
-    protected function getDataViaPattern(object $startingPoint, array $pattern): array
+    protected function getDataViaPattern(object|array $startingPoint, array $pattern): array
     {
         foreach ($pattern as $patkey => $patvalue){
-            $path = [];
+            /*$path = [];
             $items = preg_split('/->/', $patvalue);
             foreach($items as $item){
                 $item = preg_split('/:/', $item);
@@ -415,92 +373,42 @@ class ExchangeRates extends Model
                 if(count($item)>1){
                     $path[$item[0]] = $item[1];
                 } else{ $path[$item[0]] = null; }
-            }
-            if($patkey == key($pattern) || !array_key_exists(key($path), $pattern)){ ${$patkey} = $startingPoint;}
-            else if(!is_string($pattern[key($path)])) { ${$patkey} = ${key($path)}; }
+            }*/
+            $path = preg_split('/->/', $patvalue);
+            $firstEllement = $path[0];
+            if($patkey == key($pattern) || !array_key_exists($firstEllement, $pattern)){ ${$patkey} = (array) $startingPoint;}
+            else if(!is_string($pattern[$firstEllement])) { ${$patkey} = (array) ${$firstEllement}; }
             else return [400, "Wrong pattern elements positioning"];
-            foreach ($path as $pathkey => $pathitem){
-                if($pathkey){while (str_ends_with($pathkey, '|')) { $pathkey = substr($pathkey, 0, -1); }}
-                if($pathkey && !in_array($pathkey, array_keys($pattern))){ ${$patkey} = ${$patkey}->$pathkey; }
-                if($pathitem){ ${$patkey} = ${$patkey}[$pathitem]; }
-                //if(ctype_digit($pathitem)) {$pathitem}
-            }
-            $pattern[$patkey] = ${$patkey};
-        }
-        return [200, $pattern];
-    }
-
-    /**
-     * Custom method to get data via pattern.
-     *
-     * @param object $startingPoint
-     * @param array $pattern
-     * @return array
-     */
-    protected function getDataViaPattern2(object $startingPoint, array $pattern): array
-    {
-        foreach ($pattern as $patkey => $patvalue){
-            $path = [];
-            $items = preg_split('/->/', $patvalue);
-            foreach($items as $item){
-                $item = preg_split('/:/', $item);
-                while(array_key_exists($item[0], $path)){ $item[0] = $item[0].'|'; }
-                if(count($item)>1){
-                    $path[$item[0]] = $item[1];
-                } else{ $path[$item[0]] = null; }
-            }
-            if($patkey == key($pattern) || !array_key_exists(key($path), $pattern)){ ${$patkey} = $startingPoint;}
-            else if(!is_string($pattern[key($path)])) { ${$patkey} = ${key($path)}; }
-            else return [400, "Wrong pattern elements positioning"];
-            foreach ($path as $pathkey => $pathitem){
-                /*$apndToArray = false;
-                $i = 0;
-                $d = 1;*/
-                $itemsKeysArray = [null];
-                if(${$patkey}->{'/modifier/'}){
-                    if(${$patkey}->{'/modifier/'} == '[]'){
+            $itemsKeysArray = [null];
+            $itemsOutputArray = [];
+            foreach ($path as $pathkey){
+                if(${$patkey}['/modifier/']){
+                    if(${$patkey}['/modifier/'] == '[]'){
                         $arr = (array)${$patkey};
                         unset($arr['/modifier/']);
                         $itemsKeysArray = array_keys($arr);
-                        //${$patkey}->{'/items/'} = [];
-                        //$apndToArray = true;
                     }
                 }
                 foreach($itemsKeysArray as $itemKey){
-                    if($pathkey){while (str_ends_with($pathkey, '|')) { $pathkey = substr($pathkey, 0, -1); }}
-                    if($pathkey && !in_array($pathkey, array_keys($pattern))){
-                        if($itemKey){
-                            if(!${$patkey}->{'/items/'}){
-                                //return [100, (array)(((array)${$patkey})[$itemKey])];
-                                ${$patkey}->{'/items/'}[$itemKey] = (array)(((array)${$patkey})[$itemKey])[$pathkey];
-                            }
-                            else{
-                                ${$patkey}->{'/items/'}[$itemKey] = ${$patkey}->{'/items/'}[$itemKey][$pathkey];
-                            }
-                            /*if($pathkey == 'code'){
-                                return [100, ${$patkey}->{'/items/'}[$itemKey]];
-                            }*/
-                            //return [100, ${$patkey}->{'/items/'}];
-                            /*if($pathkey == 'code'){
-                                return [100, (array)(((array)${$patkey})[$itemKey])];
-                            }*/
-                            //${$patkey}->{'/items/'}[$itemKey] = ${$patkey}->{'/items/'}[$itemKey][$pathkey];
-                            /*if($pathkey == 'code'){
-                                return [100, ${$patkey}->{'/items/'}[$itemKey]];
-                            }*/
-                            //return [100, ${$patkey}->{'/items/'}[$itemKey]];
+                    //if($pathkey){while (str_ends_with($pathkey, '|')) { $pathkey = substr($pathkey, 0, -1); }}
+                    if($pathkey=='[]') ${$patkey}['/modifier/'] = "[]";
+                    /*else if($pathkey=='@selfkey') $itemsOutputArray[$itemKey] = key(((array)${$patkey}));
+                    else if($pathkey=='@selfvalue') $itemsOutputArray[$itemKey] = ((array)${$patkey})[$pathkey];*/
+                    else if(($pathkey || $pathkey == '0') && !in_array($pathkey, array_keys($pattern))) {
+                        if($itemKey || $itemKey == '0'){
+                            if($pathkey=='@selfkey') $itemsOutputArray[$itemKey] = $itemKey;
+                            else if($pathkey=='@selfvalue') $itemsOutputArray[$itemKey] = ((array)${$patkey})[$itemKey];
+                            else if(!$itemsOutputArray[$itemKey]) $itemsOutputArray[$itemKey] = (array)((array)((array)${$patkey})[$itemKey])[$pathkey];
+                            else $itemsOutputArray[$itemKey] = $itemsOutputArray[$itemKey][$pathkey];
                         }
-                        else ${$patkey} = ${$patkey}->$pathkey;
+                        else ${$patkey} = (array)((array)${$patkey})[$pathkey];
                     }
-                    if($pathitem){
-                        if($pathitem=='[]') ${$patkey}->{'/modifier/'} = "[]";
-                        else{
-                            if($itemKey) ${$patkey}->{'/items/'}[$itemKey] = ${$patkey}->{'/items/'}[$itemKey][$pathitem];
-                            else ${$patkey} = ${$patkey}[$pathitem];
-                        }
-                    }
-                    //$i++;
+                    /*if($pathitem){
+                        if($pathitem=='[]') ${$patkey}['/modifier/'] = "[]";
+                        else ${$patkey} = ${$patkey}[$pathitem];
+                    }*/
                 }
+                if(!empty($itemsOutputArray)) ${$patkey} = $itemsOutputArray;
             }
             $pattern[$patkey] = ${$patkey};
         }
@@ -514,23 +422,15 @@ class ExchangeRates extends Model
      * @return array
      */
     public function createObject(array $object): array{
-        //$rates = $this->objectStructure['rates'];
         $rates = [];
         foreach ($object['_rates'] as $rate){
-            /*$_rate = str_replace('_code', $rate['_code'], $rates);
-            $_rate = str_replace('_rate', $rate['_rate'], $_rate);*/
-            //return [200, gettype($rate['_code'])];
             $rates[(string)$rate['_code']] = (float)$rate['_rate'];
         }
 
-        /*$base = $this->objectStructure['base'];
-        $_base = str_replace('_base', $object['_code'], $base);
-        $_base = str_replace('_rates', $_rates, $_base);*/
-        $base['date'] = $this->date;
+        //$base['date'] = $this->date;
+        $base['date'] = (string)$object['_date'];
         $base['base'] = (string)$object['_base'];
         $base['rates'] = (object)$rates;
-
-        //$obj[$this->date] = $base;
 
         return [200, (object)$base];
     }

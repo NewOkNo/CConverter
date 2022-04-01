@@ -35,6 +35,13 @@ abstract class Model{
     protected $tempPath = __DIR__ . '/../../public/storage/temp';
 
     /**
+     * Acceptable http status codes range.
+     *
+     * @var string
+     */
+    protected $acceptableStatusCodesRange = [100, 299];
+
+    /**
      * Models body path.
      *
      * @var array
@@ -85,7 +92,21 @@ abstract class Model{
         foreach ($files as $file){
             unlink($file);
         }
-        rmdir($this->tempPath);
+        //rmdir($this->tempPath);
+    }
+
+    /**
+     * Makes HTTP requests.
+     *
+     * @return void
+     */
+    protected function makeRequest(string $link, $context = null): array
+    {
+        $response = file_get_contents($link, context: $context);
+        preg_match( "#HTTP/[0-9\.]+\s+([0-9]+)#", $http_response_header[0], $out);
+        $respCode = $out[1];
+        if($respCode <= $this->acceptableStatusCodesRange[0] || $respCode >= $this->acceptableStatusCodesRange[1]) return [500, 'Request fail'];
+        return [200, $response];
     }
 
     /**
