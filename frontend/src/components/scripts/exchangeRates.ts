@@ -9,7 +9,7 @@ class getExchangeRates {
     else {
       const date = new Date();
       // TODO: change date to today's one in 13:00 (fix backend first)
-      date.setDate(date.getDate() - 3);
+      date.setDate(date.getDate() - 1);
       this.date = date.toISOString().slice(0, 10);
     }
 
@@ -49,7 +49,7 @@ class getExchangeRates {
         else throw new Error('Network response was not OK');
       })
       .then((json) => {
-        if(json.date != this.date || json.base != this.base) throw new Error('Wrong data'+json.date+' '+json.base+' '+this.date+' '+this.base);
+        if(json.date != this.date || json.base != this.base) throw new Error('Wrong data '+json.date+' '+json.base+' '+this.date+' '+this.base);
         else{
           if(this.to){
             if(json.rates[this.to]) return json.rates[this.to];
@@ -57,9 +57,6 @@ class getExchangeRates {
           else return json.rates;
         }
       })
-      .catch((err) => {
-        console.log(err);
-      });
     return response;
     //return [200, response];
     /*fetch(this.url + this.date + "/" + this.base).then((res) => {
@@ -70,5 +67,30 @@ class getExchangeRates {
     });*/
   }
 }
-export { getExchangeRates };
+
+
+function getRounded(value: number | string) {
+  if(typeof value === 'string') value = parseFloat(value);
+  if(!value) return 0
+  let beforeDot = 0
+  let afterDot = 0
+  let switcher = false
+  let valueStr = value.toString()
+  for(var i = 0; i < valueStr.length; i++) {
+    if (valueStr.charAt(i) == '.') {
+      switcher = true
+    } else {
+      if (switcher) {
+        afterDot += 1
+      } else {
+        beforeDot += 1
+      }
+    }
+  }
+  if(afterDot > 2 && beforeDot > 3) return value.toFixed(2)
+  else if(afterDot > 4) return value.toFixed(4)
+  else return value
+}
+
+export { getExchangeRates, getRounded };
 //export default getExchangeRates;

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 
-//import { defineComponent } from "vue";
-import { getExchangeRates } from "@/components/scripts/exchangeRates";
+import { getExchangeRates, getRounded } from "@/components/scripts/exchangeRates";
 import { ref, onMounted, computed } from 'vue';
 
 
 interface Props{
   date?: String,
+  dateMin?: String,
+  dateMax?: String,
   base?: String,
   to?: String,
   amountFrom?: Number,
@@ -14,12 +15,16 @@ interface Props{
 
 const props = withDefaults(defineProps<Props>(), {
   date: null,
+  dateMin: "1999-01-01",
+  dateMax: (new getExchangeRates(null)).date,
   base: 'EUR',
   to: 'USD',
   amountFrom: 1,
 })
 
 const date = ref(props.date)
+const dateMin = ref(props.dateMin)
+const dateMax = ref(props.dateMax)
 const base = ref(props.base)
 const to = ref(props.to)
 const amountFrom = ref(props.amountFrom)
@@ -30,29 +35,9 @@ const rates = ref({})
 
 new getExchangeRates(date.value, base.value).getRates().then((res) => {
   rates.value = res
+  let mult = (base.value == props.base) ? 1 : 1 / rates.value[base.value]
+  amountTo.value = getRounded(mult * amountFrom.value * rates.value[to.value])
 })
-
-function getRounded(value: number | string) {
-  if(!value) return 0
-  let beforeDot = 0
-  let afterDot = 0
-  let switcher = false
-  let valueStr = value.toString()
-  for(var i = 0; i < valueStr.length; i++) {
-    if (valueStr.charAt(i) == '.') {
-      switcher = true
-    } else {
-      if (switcher) {
-        afterDot += 1
-      } else {
-        beforeDot += 1
-      }
-    }
-  }
-  if(afterDot > 2 && beforeDot > 3) return value.toFixed(2)
-  else if(afterDot > 4) return value.toFixed(4)
-  else return value
-}
 
 function converCurency(event: Event) {
   //let type = event.target.type
@@ -69,13 +54,31 @@ function converCurency(event: Event) {
     if(id[0] == 'from') {
       amountFrom.value = value
       amountTo.value = getRounded(mult * value * rates.value[to.value])
-    } else {
+    }
+    else{
       amountTo.value = value
       amountFrom.value = getRounded(mult * value / rates.value[to.value])
     }
   }
   else if(id[1] == 'select'){
     amountTo.value = getRounded(mult * amountFrom.value * rates.value[to.value])
+  }
+  else if(id == 'date'){
+    let valueDate = new Date(value);
+    if(!valueDate instanceof Date || isNaN(valueDate.valueOf()) || valueDate > new Date(dateMax) || valueDate < new Date(dateMin)){
+      date.value = dateMax
+    }
+    else{
+      amountTo.value = 0
+      new getExchangeRates(value, base.value).getRates().then((res) => {
+        rates.value = res
+        amountTo.value = getRounded(mult * amountFrom.value * rates.value[to.value])
+      })
+      .catch((err) => {
+        console.log(err)
+        date.value = dateMax
+      })
+    }
   }
 }
 
@@ -103,7 +106,7 @@ function converCurency(event: Event) {
       </div>
       <div class="footer">
         <div class="text">Convertations date:</div>
-        <div class="date">{{ date }}</div>
+        <input class="date" id="date" type="date" v-model="date" @change="converCurency" min="{{ dateMin }}" :max="dateMax">
       </div>
     </form>
   </div>
@@ -185,10 +188,6 @@ function converCurency(event: Event) {
   justify-content: center;
   align-items: center;
 }
-/*.converter .body .from {
-  border-right: 1px solid #ccc;
-  width: 50%;
-}*/
 .converter .footer {
   /*background-color: #e6e6e6;
   border-radius: 0 0 16px 16px;*/
@@ -200,11 +199,13 @@ function converCurency(event: Event) {
   align-items: end;
 }
 .converter .footer .date {
+  width: auto;
   font-size: 18px;
   margin-left: 8px;
-}
-.converter .footer .text {
-  margin-bottom: 2px;
+  margin-bottom: 0px;
+  border-bottom: 1px solid #ccc;
+  justify-content: center;
+  align-items: center;
 }
 input, select{
   background: none;
@@ -213,5 +214,10 @@ input, select{
 input:focus, select:focus{
   background: white;
   border: 1px solid grey;
+}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-inner-spin-button{
+    margin: auto;
+    font-size: 84%;
 }
 </style>
