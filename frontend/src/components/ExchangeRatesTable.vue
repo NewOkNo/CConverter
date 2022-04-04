@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { getExchangeRates, getRounded } from "@/components/scripts/exchangeRates";
+import { getExchangeRates, getRounded, getCurrencyName } from "@/components/scripts/exchangeRates";
 import { ref, onMounted, computed } from 'vue';
 
 
@@ -71,7 +71,7 @@ function converCurency(event: Event) {
         </thead>
         <tbody>
           <tr v-for="(rate, currency) in rates">
-            <td>{{ currency }}</td>
+            <td>{{ currency + ' - ' + getCurrencyName(currency) }}</td>
             <td>{{ getRounded(rate) }}</td>
           </tr>
         </tbody>
@@ -116,5 +116,9 @@ input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="date"]::-webkit-inner-spin-button{
     margin: auto;
     font-size: 84%;
+}
+th{
+  text-align: left;
+  font-weight: bold;
 }
 </style>

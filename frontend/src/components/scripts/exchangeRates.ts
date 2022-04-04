@@ -1,3 +1,5 @@
+import currencyNames from '@/assets/currencyNames.json';
+
 class getExchangeRates {
   date: string;
   base: string;
@@ -92,5 +94,13 @@ function getRounded(value: number | string) {
   else return value
 }
 
-export { getExchangeRates, getRounded };
+function getCurrencyName(code: string){
+  //let json = JSON.parse(dictionaryPath)
+  let curName = currencyNames[code]
+
+  if(!curName) return code
+  return curName
+} 
+
+export { getExchangeRates, getRounded, getCurrencyName };
 //export default getExchangeRates;

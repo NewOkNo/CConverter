@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { getExchangeRates, getRounded } from "@/components/scripts/exchangeRates";
+import { getExchangeRates, getRounded, getCurrencyName } from "@/components/scripts/exchangeRates";
 import { ref, onMounted, computed } from 'vue';
 
 
@@ -65,8 +65,9 @@ function converCurency(event: Event) {
   }
   else if(id == 'date'){
     let valueDate = new Date(value);
-    if(!valueDate instanceof Date || isNaN(valueDate.valueOf()) || valueDate > new Date(dateMax) || valueDate < new Date(dateMin)){
-      date.value = dateMax
+    if(!valueDate instanceof Date || isNaN(valueDate.valueOf()) || valueDate > new Date(dateMax.value) || valueDate < new Date(dateMin.value)){
+      //console.log('here'dateMax.value)
+      date.value = dateMax.value
     }
     else{
       amountTo.value = 0
@@ -76,7 +77,7 @@ function converCurency(event: Event) {
       })
       .catch((err) => {
         console.log(err)
-        date.value = dateMax
+        date.value = dateMax.value
       })
     }
   }
