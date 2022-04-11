@@ -5,16 +5,25 @@ import { ref, onMounted, computed } from 'vue';
 
 
 interface Props{
-  date?: String,
-  dateMin?: String,
-  dateMax?: String,
-  base?: String,
+  date?: string,
+  dateMin?: string,
+  dateMax?: string,
+  base?: string,
 }
 
+/*
+const {
+  date = '',
+  dateMin = "1999-01-01",
+  dateMax = (new getExchangeRates()).date,
+  base = 'EUR',
+} = defineProps<Props>()
+*/
+
 const props = withDefaults(defineProps<Props>(), {
-  date: null,
+  date: '',
   dateMin: "1999-01-01",
-  dateMax: (new getExchangeRates(null)).date,
+  dateMax: (new getExchangeRates()).date,
   base: 'EUR',
 })
 
@@ -30,8 +39,9 @@ new getExchangeRates(date.value, base.value).getRates().then((res) => {
 })
 
 function converCurency(event: Event) {
-  let id = event.target.id
-  let value = event.target.value
+  const target = event.target as HTMLInputElement
+  let id = target.id
+  let value = target.value
 
   if(id=='date'){
     date.value = value

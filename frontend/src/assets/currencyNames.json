@@ -24,6 +24,7 @@
   "BTN": "Bhutanese Ngultrum",
   "BWP": "Botswanan Pula",
   "BYN": "Belarusian Ruble",
+  "BYR": "Belarusian Ruble (old)",
   "BZD": "Belize Dollar",
   "CAD": "Canadian Dollar",
   "CDF": "Congolese Franc",
@@ -87,6 +88,8 @@
   "LKR": "Sri Lankan Rupee",
   "LRD": "Liberian Dollar",
   "LSL": "Lesotho Loti",
+  "LTL": "Lithuanian Litas",
+  "LVL": "Latvian Lats",
   "LYD": "Libyan Dinar",
   "MAD": "Moroccan Dirham",
   "MDL": "Moldovan Leu",
@@ -95,6 +98,7 @@
   "MMK": "Myanma Kyat",
   "MNT": "Mongolian Tugrik",
   "MOP": "Macanese Pataca",
+  "MRO": "Mauritaania Ugia",
   "MRU": "Mauritanian Ouguiya",
   "MUR": "Mauritian Rupee",
   "MVR": "Maldivian Rufiyaa",
@@ -167,6 +171,7 @@
   "XPT": "Platinum Ounce",
   "YER": "Yemeni Rial",
   "ZAR": "South African Rand",
+  "ZMK": "Sambia Kvatša",
   "ZMW": "Zambian Kwacha",
   "ZWL": "Zimbabwean Dollar"
 }

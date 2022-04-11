@@ -5,18 +5,18 @@ import { ref, onMounted, computed } from 'vue';
 
 
 interface Props{
-  date?: String,
-  dateMin?: String,
-  dateMax?: String,
-  base?: String,
-  to?: String,
-  amountFrom?: Number,
+  date?: string,
+  dateMin?: string,
+  dateMax?: string,
+  base?: string,
+  to?: string,
+  amountFrom?: number,
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  date: null,
+  date: '',
   dateMin: "1999-01-01",
-  dateMax: (new getExchangeRates(null)).date,
+  dateMax: (new getExchangeRates()).date,
   base: 'EUR',
   to: 'USD',
   amountFrom: 1,
@@ -35,16 +35,17 @@ const rates = ref({})
 
 new getExchangeRates(date.value, base.value).getRates().then((res) => {
   rates.value = res
-  let mult = (base.value == props.base) ? 1 : 1 / rates.value[base.value]
-  amountTo.value = getRounded(mult * amountFrom.value * rates.value[to.value])
+  let mult = (base.value == props.base) ? 1 : 1 / (rates.value as any)[base.value]
+  amountTo.value = getRounded(mult * amountFrom.value * (rates.value as any)[to.value])
 })
 
 function converCurency(event: Event) {
-  //let type = event.target.type
-  let id = event.target.id.split(':')
-  let value = event.target.value
+  const target = event.target as HTMLInputElement
 
-  let mult = (base.value == props.base) ? 1 : 1 / rates.value[base.value]
+  let id = target.id.split(':')
+  let value: any = target.value
+
+  let mult = (base.value == props.base) ? 1 : 1 / (rates.value as any)[base.value]
 
   if(id[1] == 'input'){
     if(!value || value == '' || value == null) value = '0'
@@ -53,19 +54,19 @@ function converCurency(event: Event) {
     //value = getRounded(value)
     if(id[0] == 'from') {
       amountFrom.value = value
-      amountTo.value = getRounded(mult * value * rates.value[to.value])
+      amountTo.value = getRounded(mult * value * (rates.value as any)[to.value])
     }
     else{
       amountTo.value = value
-      amountFrom.value = getRounded(mult * value / rates.value[to.value])
+      amountFrom.value = getRounded(mult * value / (rates.value as any)[to.value])
     }
   }
   else if(id[1] == 'select'){
-    amountTo.value = getRounded(mult * amountFrom.value * rates.value[to.value])
+    amountTo.value = getRounded(mult * amountFrom.value * (rates.value as any)[to.value])
   }
-  else if(id == 'date'){
+  else if(id[0] == 'date'){
     let valueDate = new Date(value);
-    if(!valueDate instanceof Date || isNaN(valueDate.valueOf()) || valueDate > new Date(dateMax.value) || valueDate < new Date(dateMin.value)){
+    if(!(valueDate instanceof Date) || isNaN(valueDate.valueOf()) || valueDate > new Date(dateMax.value) || valueDate < new Date(dateMin.value)){
       //console.log('here'dateMax.value)
       date.value = dateMax.value
     }
@@ -73,7 +74,7 @@ function converCurency(event: Event) {
       amountTo.value = 0
       new getExchangeRates(value, base.value).getRates().then((res) => {
         rates.value = res
-        amountTo.value = getRounded(mult * amountFrom.value * rates.value[to.value])
+        amountTo.value = getRounded(mult * amountFrom.value * (rates.value as any)[to.value])
       })
       .catch((err) => {
         console.log(err)

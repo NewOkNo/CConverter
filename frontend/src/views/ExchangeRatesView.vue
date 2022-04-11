@@ -6,9 +6,9 @@ import { defineComponent } from "vue";
 import { getExchangeRates } from "@/components/scripts/exchangeRates";
 import { ref, onMounted } from 'vue'
 
-const date = (new getExchangeRates(null)).date;  // will get last possible date if null
+const date = (new getExchangeRates()).date;  // will get last possible date if null
 const dateMin = "1999-01-01"  // rn backends minimum is 1999-01-01
-const dateMax = (new getExchangeRates(null)).date
+const dateMax = (new getExchangeRates()).date
 const base = 'EUR';
 const to = 'USD';
 const amountFrom = 1;

@@ -9,9 +9,13 @@ class getExchangeRates {
   constructor(date?: string, base?: string, to?: string) {
     if (date) this.date = date;
     else {
+      // shows todays date after 13:00
       const date = new Date();
-      // TODO: change date to today's one in 13:00 (fix backend first)
-      date.setDate(date.getDate() - 1);
+      const updateTime = new Date();
+      updateTime.setHours(0,0,0,0);
+      updateTime.setTime(updateTime.getTime() + 46800000);
+      console.log(date + ' | ' + updateTime);
+      if(date.getTime() < updateTime.getTime()) date.setDate(date.getDate() - 1)
       this.date = date.toISOString().slice(0, 10);
     }
 
@@ -24,27 +28,7 @@ class getExchangeRates {
     this.url += this.date+'/'+this.base
     //if(this.to) this.url += '/'+this.to;
   }
-  /*getRates() {
-    const xhttp = new XMLHttpRequest();
-    xhttp.onload = function() {
-        if (this.status == 200) {
-          document.getElementById("date").innerHTML = JSON.parse(this.responseText).date;
-          document.getElementById("base").innerHTML = JSON.parse(this.responseText).base;
-        }
-      }
-    xhttp.open("GET", (this.url + this.date + "/" + this.base), true);
-    xhttp.send();
-    return(xhttp);
-  }*/
-  //// fetch() does ajax requests so it's probably counts ////
   async getRates() {
-    //return this;
-    //this.url + this.date + "/" + this.base
-    //let response;
-
-    /*return fetch(this.url, {cache: "force-cache"}).then(
-      (res) => res.json()
-    );*/
     let response = fetch(this.url, {cache: "force-cache"})
       .then((res) => {
         if(res.ok) return res.json()
@@ -60,18 +44,11 @@ class getExchangeRates {
         }
       })
     return response;
-    //return [200, response];
-    /*fetch(this.url + this.date + "/" + this.base).then((res) => {
-      if (res.ok) return [200, res.json()];
-      else return [res.status, res.json()];
-    }).catch((err) => {
-      return [500, err];
-    });*/
   }
 }
 
 
-function getRounded(value: number | string) {
+function getRounded(value: number | string): number {
   if(typeof value === 'string') value = parseFloat(value);
   if(!value) return 0
   let beforeDot = 0
@@ -89,14 +66,14 @@ function getRounded(value: number | string) {
       }
     }
   }
-  if(afterDot > 2 && beforeDot > 3) return value.toFixed(2)
-  else if(afterDot > 4) return value.toFixed(4)
+  if(afterDot > 2 && beforeDot > 3) return Number.parseFloat(value.toFixed(2))
+  else if(afterDot > 4) return Number.parseFloat(value.toFixed(4))
   else return value
 }
 
 function getCurrencyName(code: string){
   //let json = JSON.parse(dictionaryPath)
-  let curName = currencyNames[code]
+  let curName = (currencyNames as any)[code]
 
   if(!curName) return code
   return curName
