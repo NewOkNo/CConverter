@@ -1,89 +1,106 @@
 <script setup lang="ts">
+import {
+  getExchangeRates,
+  getRounded,
+  getCurrencyName,
+} from "@/components/scripts/exchangeRates";
+import { ref, onMounted, computed } from "vue";
 
-import { getExchangeRates, getRounded, getCurrencyName } from "@/components/scripts/exchangeRates";
-import { ref, onMounted, computed } from 'vue';
-
-
-interface Props{
-  date?: string,
-  dateMin?: string,
-  dateMax?: string,
-  base?: string,
-  to?: string,
-  amountFrom?: number,
+interface Props {
+  date?: string;
+  dateMin?: string;
+  dateMax?: string;
+  base?: string;
+  to?: string;
+  amountFrom?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  date: '',
+  date: "",
   dateMin: "1999-01-01",
-  dateMax: (new getExchangeRates()).date,
-  base: 'EUR',
-  to: 'USD',
+  dateMax: new getExchangeRates().date,
+  base: "EUR",
+  to: "USD",
   amountFrom: 1,
-})
+});
 
-const date = ref(props.date)
-const dateMin = ref(props.dateMin)
-const dateMax = ref(props.dateMax)
-const base = ref(props.base)
-const to = ref(props.to)
-const amountFrom = ref(props.amountFrom)
+const date = ref(props.date);
+const dateMin = ref(props.dateMin);
+const dateMax = ref(props.dateMax);
+const base = ref(props.base);
+const to = ref(props.to);
+const amountFrom = ref(props.amountFrom);
 
-const amountTo = ref(0)
+const amountTo = ref(0);
 
-const rates = ref({})
+const rates = ref({});
 
 new getExchangeRates(date.value, base.value).getRates().then((res) => {
-  rates.value = res
-  let mult = (base.value == props.base) ? 1 : 1 / (rates.value as any)[base.value]
-  amountTo.value = getRounded(mult * amountFrom.value * (rates.value as any)[to.value])
-})
+  rates.value = res;
+  let mult =
+    base.value == props.base ? 1 : 1 / (rates.value as any)[base.value];
+  amountTo.value = getRounded(
+    mult * amountFrom.value * (rates.value as any)[to.value]
+  );
+});
 
 function converCurency(event: Event) {
-  const target = event.target as HTMLInputElement
+  const target = event.target as HTMLInputElement;
 
-  let id = target.id.split(':')
-  let value: any = target.value
+  let id = target.id.split(":");
+  let value: any = target.value;
 
-  let mult = (base.value == props.base) ? 1 : 1 / (rates.value as any)[base.value]
+  let mult =
+    base.value == props.base ? 1 : 1 / (rates.value as any)[base.value];
 
-  if(id[1] == 'input'){
-    if(!value || value == '' || value == null) value = '0'
-    value = value.replace(/[^0-9.]+/g, '')
-    while(value.length > 1 && value.charAt(0)=='0' && value.charAt(1)!='.') value = value.substr(1)
+  if (id[1] == "input") {
+    if (!value || value == "" || value == null) value = "0";
+    value = value.replace(/[^0-9.]+/g, "");
+    while (value.length > 1 && value.charAt(0) == "0" && value.charAt(1) != ".")
+      value = value.substr(1);
     //value = getRounded(value)
-    if(id[0] == 'from') {
-      amountFrom.value = value
-      amountTo.value = getRounded(mult * value * (rates.value as any)[to.value])
+    if (id[0] == "from") {
+      amountFrom.value = value;
+      amountTo.value = getRounded(
+        mult * value * (rates.value as any)[to.value]
+      );
+    } else {
+      amountTo.value = value;
+      amountFrom.value = getRounded(
+        (mult * value) / (rates.value as any)[to.value]
+      );
     }
-    else{
-      amountTo.value = value
-      amountFrom.value = getRounded(mult * value / (rates.value as any)[to.value])
-    }
-  }
-  else if(id[1] == 'select'){
-    amountTo.value = getRounded(mult * amountFrom.value * (rates.value as any)[to.value])
-  }
-  else if(id[0] == 'date'){
+  } else if (id[1] == "select") {
+    amountTo.value = getRounded(
+      mult * amountFrom.value * (rates.value as any)[to.value]
+    );
+  } else if (id[0] == "date") {
     let valueDate = new Date(value);
-    if(!(valueDate instanceof Date) || isNaN(valueDate.valueOf()) || valueDate > new Date(dateMax.value) || valueDate < new Date(dateMin.value)){
+    if (
+      !(valueDate instanceof Date) ||
+      isNaN(valueDate.valueOf()) ||
+      valueDate > new Date(dateMax.value) ||
+      valueDate < new Date(dateMin.value)
+    ) {
       //console.log('here'dateMax.value)
-      date.value = dateMax.value
-    }
-    else{
-      amountTo.value = 0
-      new getExchangeRates(value, base.value).getRates().then((res) => {
-        rates.value = res
-        amountTo.value = getRounded(mult * amountFrom.value * (rates.value as any)[to.value])
-      })
-      .catch((err) => {
-        console.log(err)
-        date.value = dateMax.value
-      })
+      date.value = dateMax.value;
+    } else {
+      amountTo.value = 0;
+      new getExchangeRates(value, base.value)
+        .getRates()
+        .then((res) => {
+          rates.value = res;
+          amountTo.value = getRounded(
+            mult * amountFrom.value * (rates.value as any)[to.value]
+          );
+        })
+        .catch((err) => {
+          console.log(err);
+          date.value = dateMax.value;
+        });
     }
   }
 }
-
 </script>
 
 <template>
@@ -92,23 +109,68 @@ function converCurency(event: Event) {
       <div class="header">Currency Converter</div>
       <div class="body">
         <div class="from">
-          <select class="cur" id="from:select" v-model="base" @change="converCurency">
-            <option :value="props.base">{{ props.base }}</option>
-            <option v-for="(rate, currency) in rates" :value="currency" @click="converCurency">{{ currency }}</option>
+          <select
+            class="cur"
+            id="from:select"
+            v-model="base"
+            @change="converCurency"
+          >
+            <!--<option :value="props.base">{{ props.base }}</option>-->
+            <option
+              v-for="(rate, currency) in rates"
+              :key="currency"
+              :value="currency"
+              @click="converCurency"
+            >
+              {{ currency }}
+            </option>
           </select>
-          <input class="amount" id="from:input" type="text" v-model="amountFrom" @input="converCurency" maxlength="8">
+          <input
+            class="amount"
+            id="from:input"
+            type="text"
+            v-model="amountFrom"
+            @input="converCurency"
+            maxlength="8"
+          />
         </div>
         <div class="symb">-></div>
         <div class="to">
-          <input class="amount" id="to:input" type="text" v-model="amountTo" @input="converCurency" maxlength="8">
-          <select class="cur" id="to:select" v-model="to" @change="converCurency">
-            <option v-for="(rate, currency) in rates" :value="currency">{{ currency }}</option>
+          <input
+            class="amount"
+            id="to:input"
+            type="text"
+            v-model="amountTo"
+            @input="converCurency"
+            maxlength="8"
+          />
+          <select
+            class="cur"
+            id="to:select"
+            v-model="to"
+            @change="converCurency"
+          >
+            <option
+              v-for="(rate, currency) in rates"
+              :key="currency"
+              :value="currency"
+            >
+              {{ currency }}
+            </option>
           </select>
         </div>
       </div>
       <div class="footer">
         <div class="text">Convertations date:</div>
-        <input class="date" id="date" type="date" v-model="date" @change="converCurency" min="{{ dateMin }}" :max="dateMax">
+        <input
+          class="date"
+          id="date"
+          type="date"
+          v-model="date"
+          @change="converCurency"
+          min="{{ dateMin }}"
+          :max="dateMax"
+        />
       </div>
     </form>
   </div>
@@ -122,7 +184,8 @@ function converCurency(event: Event) {
   border-right: 1px solid #ccc;
   width: 100%;
 }
-.converter div, select {
+.converter div,
+select {
   display: flex;
   flex-direction: column;
 }
@@ -140,7 +203,9 @@ function converCurency(event: Event) {
   display: flex;
   flex-direction: row;
 }
-.converter .body div, input, select {
+.converter .body div,
+input,
+select {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -209,17 +274,30 @@ function converCurency(event: Event) {
   justify-content: center;
   align-items: center;
 }
-input, select{
+input,
+select {
   background: none;
   border: none;
 }
-input:focus, select:focus{
+input:focus {
   background: white;
   border: 1px solid grey;
 }
 input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="date"]::-webkit-inner-spin-button{
-    margin: auto;
-    font-size: 84%;
+input[type="date"]::-webkit-inner-spin-button {
+  margin: auto;
+  font-size: 84%;
 }
+/*select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-size: 1.2em;
+}
+.from select {
+  background-position: right 0.5em center;
+}
+.to select {
+  background-position: left 0.5em center;
+}*/
 </style>
