@@ -254,53 +254,22 @@ class ExchangeRates extends Model
      */
     protected function getData(array $data): array
     {
-        $type = $data['type'];
         $link = str_replace('$_date', $this->date, $data['link']);
+        $response = $this->{'getData'.$data['type']}($data, $link);
+        if($response[0]!=200) return $response;
+        $start = $response[1];
+        //$type = $data['type'];
+        //$link = str_replace('$_date', $this->date, $data['link']);
 
-        if($type == 'xml'){
-            $data['saveTo'] .= $this->date . ".xml";
+        /*if($type == 'xml'){
 
-            $response = $this->makeRequest($link);
-            if($response[0]!=200) return $response;
+        }*/
+        /*else if($type == 'json'){
 
-            if (file_put_contents($data['saveTo'], $response[1])){
-                $start = simplexml_load_file($data['saveTo'], null, LIBXML_NOCDATA) or die("Error: Cannot create object");
-            }
-            else return [500, 'Fail while saving a file'];
-        }
-        else if($type == 'json'){
-            // TODO: automate it more
-            if(stristr($data['link'], '$_key')) $data['link'] = str_replace('$_key', $_ENV[$data['key']], $data['link']);
-            if(stristr($data['link'], '$_date')) $link = str_replace('$_date', $this->date, $data['link']);
-            //return [100, $link];
-            if($data['method']=='POST'){
-                $data['body'] = str_replace('$_date', $this->date, $data['body']);
-                $postdata = http_build_query([key($data['body']) => reset($data['body'])]);
-                $opts = ['http' => [
-                        'method' => $data['method'],
-                        'header' => 'Content-type: application/x-www-form-urlencoded',
-                        'content' => $postdata
-                    ]
-                ];
-                $context = stream_context_create($opts);
-                $response = $this->makeRequest($link, $context);
-            }
-            else{
-                $response = $this->makeRequest($link);
-            }
+        }*/
+        /*else if($type == 'html'){
 
-            if($response[0]!=200) return $response;
-
-            $start = json_decode($response[1]);
-        }
-        else if($type == 'html'){
-            $response = $this->makeRequest($link);
-            if($response[0]!=200) return $response;
-
-            $start = [];
-            $lines = preg_split("/\r\n|\r|\n/", $response[1]);
-            foreach ($lines as $idx => $line) $start[$idx] = preg_split('/,/',$line);
-        }else { return [404, 'Unknown type']; }
+        }else { return [404, 'Unknown type']; }*/
 
         $response = $this->getDataViaPattern($start, $data['pattern']);
         if($response[0]!=200) return $response;
@@ -353,6 +322,75 @@ class ExchangeRates extends Model
         if($response[0]!=200) return $response;
 
         return [200, $response[1]];
+    }
+
+    /**
+     * Requesting data from JSON.
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function getDatajson(array $data, string $link): array{
+        if(stristr($data['link'], '$_key')) $data['link'] = str_replace('$_key', $_ENV[$data['key']], $data['link']);
+        if(stristr($data['link'], '$_date')) $link = str_replace('$_date', $this->date, $data['link']);
+        //return [100, $link];
+        if($data['method']=='POST'){
+            $data['body'] = str_replace('$_date', $this->date, $data['body']);
+            $postdata = http_build_query([key($data['body']) => reset($data['body'])]);
+            $opts = ['http' => [
+                'method' => $data['method'],
+                'header' => 'Content-type: application/x-www-form-urlencoded',
+                'content' => $postdata
+            ]
+            ];
+            $context = stream_context_create($opts);
+            $response = $this->makeRequest($link, $context);
+        }
+        else{
+            $response = $this->makeRequest($link);
+        }
+
+        if($response[0]!=200) return $response;
+
+        $start = json_decode($response[1]);
+        return [200, $start];
+    }
+
+    /**
+     * Requesting data from HTML.
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function getDatahtml(array $data, string $link): array{
+        $response = $this->makeRequest($link);
+        if($response[0]!=200) return $response;
+
+        $start = [];
+        $lines = preg_split("/\r\n|\r|\n/", $response[1]);
+        foreach ($lines as $idx => $line) $start[$idx] = preg_split('/,/',$line);
+
+        return [200, $start];
+    }
+
+    /**
+     * Requesting data from HTML.
+     *
+     * @param array $data
+     * @return array
+     */
+    protected function getDataxml(array $data, string $link): array{
+        $data['saveTo'] .= $this->date . ".xml";
+
+        $response = $this->makeRequest($link);
+        if($response[0]!=200) return $response;
+
+        if(!file_exists($this->tempPath)) mkdir($this->tempPath, 0777, true);
+        if (file_put_contents($data['saveTo'], $response[1])){
+            $start = simplexml_load_file($data['saveTo'], null, LIBXML_NOCDATA) or die("Error: Cannot create object");
+        }
+        else return [500, 'Fail while saving a file'];
+        return [200, $start];
     }
 
     /**

@@ -85,8 +85,8 @@ function getRounded(value: number | string): number {
       }
     }
   }
-  if (afterDot > 2 && beforeDot > 3) return Number.parseFloat(value.toFixed(2));
-  else if (afterDot > 4) return Number.parseFloat(value.toFixed(4));
+  if (afterDot > 2 && beforeDot > 3) return Number.parseFloat(value.toFixed(4));
+  else if (afterDot > 4) return Number.parseFloat(value.toFixed(6));
   else return value;
 }
 
