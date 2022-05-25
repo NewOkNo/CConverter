@@ -4,10 +4,10 @@
 
 ### backend
 * Run `composer update` to download project packages
-* Create .env file
+* Create `.env` file
 * Add your [exchangeratesapi](https://exchangeratesapi.io/) key in the .env as `EXCHANGE_RATES_API_KEY=$key` for it source to work (not necessary)
 * Run `php -S localhost:8000 -t public` to run backend server
-* Go to `http://localhost:8000/cconverter/` or `http://localhost:8000/cconverter/$date/$baseCurrency` to see the result
+* Go to `http://localhost:8000/cconverter` or `http://localhost:8000/cconverter/$date/$baseCurrency` to see the result
 
 ### frontend
 * Run `npm i` to download project packages
